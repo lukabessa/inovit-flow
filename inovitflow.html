@@ -1,0 +1,3270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Inovit Flow">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#060906">
+<title>Inovit Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.10/babel.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#060906;--surface:#0A0F0A;--surf2:#0F160F;--surf3:#162016;
+  --border:rgba(34,197,94,0.08);--border2:rgba(34,197,94,0.15);
+  --accent:#22C55E;--accent2:#4ADE80;--green:#22C55E;--amber:#F59E0B;--red:#EF4444;--cyan:#06B6D4;
+  --t1:#F0FFF4;--t2:#7A9A82;--t3:#3A5240;
+  --sidebar-w:240px;
+  --radius:14px;--radius-sm:10px;
+}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+#root{height:100vh;height:100dvh;display:flex;overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:99px}
+button{cursor:pointer;border:none;background:none;color:inherit;font-family:inherit;font-size:inherit;touch-action:manipulation}
+input,textarea,select{font-family:inherit;font-size:inherit;color:var(--t1);background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 13px;outline:none;width:100%;transition:border-color .2s,box-shadow .2s}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,197,94,.12)}
+textarea{resize:vertical}
+select option{background:var(--surf2)}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}70%{box-shadow:0 0 0 7px rgba(239,68,68,0)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes pulseRing{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.fade-in{animation:fadeIn .22s ease both}
+.slide-in{animation:slideInLeft .22s ease both}
+.slide-up{animation:slideUp .28s cubic-bezier(.16,1,.3,1) both}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:width .25s cubic-bezier(.4,0,.2,1);overflow:hidden;z-index:100;position:relative}
+.sidebar.collapsed{width:64px}
+.sidebar-logo{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0;min-height:64px}
+.sidebar-logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;color:#F0FFF4;transition:opacity .2s}
+.sidebar.collapsed .sidebar-logo-text{opacity:0;width:0}
+.sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;color:var(--t2);transition:all .18s;white-space:nowrap;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--t1)}
+.nav-item.active{background:rgba(34,197,94,.12);color:var(--t1);border:1px solid rgba(34,197,94,.22)}
+.nav-item .label{font-weight:500;font-size:13px;overflow:hidden;transition:opacity .2s,width .2s}
+.sidebar.collapsed .nav-item .label{opacity:0;width:0;overflow:hidden}
+.nav-item .icon-wrap{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:22px}
+.sidebar-bottom{padding:10px 8px 16px;border-top:1px solid var(--border);flex-shrink:0}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surf2);cursor:pointer}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#22C55E,#16A34A);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#000;flex-shrink:0}
+.sidebar-user-info{overflow:hidden;transition:opacity .2s}
+.sidebar.collapsed .sidebar-user-info{opacity:0;width:0}
+.sidebar-toggle{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--t2);transition:background .15s,color .15s}
+.sidebar-toggle:hover{background:rgba(255,255,255,.07);color:var(--t1)}
+
+/* TOPBAR */
+.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0;position:relative;z-index:50}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;flex:1}
+.topbar-time{font-size:13px;color:var(--t2);font-variant-numeric:tabular-nums}
+
+/* MAIN */
+.main-content{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-weight:500;transition:all .18s;display:inline-flex;align-items:center;gap:7px;font-size:13px;white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,#22C55E,#16A34A);color:#000;font-weight:600;box-shadow:0 2px 12px rgba(34,197,94,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(34,197,94,.4)}
+.btn-primary:active{transform:translateY(0)}
+.btn-ghost{color:var(--t2);border:1px solid var(--border2);background:transparent}
+.btn-ghost:hover{color:var(--t1);background:rgba(255,255,255,.05);border-color:var(--border2)}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.18)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-success{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.18)}
+.btn-accent2{background:rgba(74,222,128,.1);color:var(--accent2);border:1px solid rgba(74,222,128,.2)}
+.btn-accent2:hover{background:rgba(74,222,128,.18)}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:8px;gap:5px}
+.btn-xs{padding:3px 9px;font-size:11px;border-radius:7px;gap:4px}
+.btn-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t2);transition:background .15s,color .15s;flex-shrink:0}
+.btn-icon:hover{background:rgba(255,255,255,.07);color:var(--t1)}
+.btn-icon.active{color:var(--accent)}
+
+/* LOGIN */
+.login-page{flex:1;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+.login-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 0%,rgba(34,197,94,.1),transparent),radial-gradient(ellipse 40% 40% at 80% 80%,rgba(22,163,74,.08),transparent);pointer-events:none}
+.login-card{background:var(--surface);border:1px solid var(--border2);border-radius:22px;padding:40px;width:100%;max-width:400px;position:relative;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.login-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;text-align:center;margin-bottom:6px;color:#F0FFF4;letter-spacing:-0.5px}
+.login-sub{font-size:13px;color:var(--t2);text-align:center;margin-bottom:28px}
+.login-tabs{display:flex;background:var(--surf2);border-radius:10px;padding:3px;margin-bottom:24px;gap:3px}
+.login-tab{flex:1;padding:7px;border-radius:8px;text-align:center;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .2s}
+.login-tab.active{background:var(--surf3);color:var(--t1)}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.login-err{font-size:12px;color:var(--red);margin-top:-8px;margin-bottom:10px}
+.login-divider{text-align:center;font-size:11px;color:var(--t3);margin:16px 0}
+
+/* MODAL */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:580px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.6)}
+.modal-sm{max-width:440px}
+.modal-header{padding:22px 26px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:linear-gradient(180deg,var(--surf2) 0%,var(--surface) 100%)}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px}
+.modal-body{padding:20px 26px;overflow-y:auto;flex:1}
+.modal-footer{padding:16px 26px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+
+/* FORM */
+.field{margin-bottom:15px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cat-option{padding:9px 6px;border-radius:11px;border:1.5px solid var(--border2);text-align:center;cursor:pointer;transition:all .18s;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.cat-option:hover{border-color:var(--border2);background:rgba(255,255,255,.04)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surf2);border-radius:var(--radius-sm);border:1px solid var(--border)}
+.toggle{position:relative;width:42px;height:23px;cursor:pointer;flex-shrink:0}
+.toggle input{display:none}
+.toggle-track{position:absolute;inset:0;background:var(--t3);border-radius:12px;transition:.3s}
+.toggle input:checked+.toggle-track{background:var(--accent)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:17px;height:17px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle input:checked~.toggle-thumb{left:22px}
+.days-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.day-chip{padding:4px 11px;border-radius:8px;border:1px solid var(--border2);font-size:12px;cursor:pointer;transition:all .18s}
+.day-chip.active{background:var(--accent);border-color:var(--accent);color:#000;font-weight:600}
+.prio-row{display:flex;gap:6px}
+.prio-btn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border2);font-size:12px;cursor:pointer;transition:all .18s}
+
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;gap:10px;padding:16px 22px 12px;flex-shrink:0}
+.cal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:19px;flex:1}
+.view-btns{display:flex;background:var(--surf2);border-radius:10px;padding:3px;gap:2px}
+.view-btn{padding:5px 14px;border-radius:8px;font-size:12px;font-weight:500;color:var(--t2);transition:all .18s;cursor:pointer}
+.view-btn.active{background:var(--accent);color:#000}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.month-dow{background:var(--surf2);padding:9px 0;text-align:center;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border)}
+.month-day{background:var(--surface);padding:7px 8px;min-height:82px;cursor:pointer;transition:background .12s;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.month-day:nth-child(7n){border-right:none}
+.month-day:hover{background:rgba(255,255,255,.025)}
+.month-day.other-month .day-num{color:var(--t3)}
+.month-day.today .day-num{background:var(--accent);color:#000;font-weight:700;box-shadow:0 2px 10px rgba(34,197,94,.4)}
+.month-day.selected{background:rgba(34,197,94,.06)}
+.day-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;margin-bottom:5px}
+.ev-pill{font-size:10px;padding:2px 6px;border-radius:5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* PAINEL */
+.painel{width:310px;border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.painel-header{padding:18px 18px 12px;border-bottom:1px solid var(--border)}
+.ev-card{background:var(--surf2);border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid transparent;transition:transform .15s}
+.ev-card:hover{transform:translateX(2px)}
+
+/* TIMELINE */
+.tl-wrap{flex:1;overflow-y:auto;padding-right:6px}
+.tl-row{display:flex;min-height:44px;align-items:flex-start;position:relative}
+.tl-time{width:54px;flex-shrink:0;font-size:10px;color:var(--t3);font-weight:600;padding-top:5px;font-variant-numeric:tabular-nums}
+.tl-rail{width:1px;background:var(--border);flex-shrink:0;margin-right:14px;align-self:stretch}
+.tl-col{flex:1;padding:2px 0}
+.tl-block{border-radius:11px;padding:9px 13px;margin-bottom:5px;transition:transform .15s;position:relative}
+.tl-block:hover{transform:translateX(2px)}
+.tl-block.done{opacity:.45}
+.tl-block.late{border-color:var(--red)!important;background:rgba(239,68,68,.07)!important}
+.tl-block.current{animation:pulseRing 2.5s infinite}
+.tl-slot-empty{border:1.5px dashed rgba(255,255,255,.09);border-radius:11px;padding:7px 13px;font-size:11px;color:var(--t3);cursor:pointer;display:flex;align-items:center;gap:7px;margin-bottom:5px;transition:all .18s}
+.tl-slot-empty:hover{border-color:var(--accent);color:var(--accent);background:rgba(34,197,94,.05)}
+.tl-agenda-block{border-radius:11px;padding:9px 13px;margin-bottom:5px;border:1px solid transparent}
+.tl-pin-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;padding:2px 6px;border-radius:5px;background:rgba(245,158,11,.15);color:var(--amber);margin-left:6px}
+
+/* PROGRESS */
+.progress-bar{height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width .5s ease}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card-sm{padding:13px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{background:var(--surf2);border-radius:12px;padding:13px;text-align:center;border:1px solid var(--border)}
+.stat-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:800}
+.stat-label{font-size:10px;color:var(--t2);margin-top:2px}
+.next-card{background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(22,163,74,.05));border:1px solid rgba(34,197,94,.2);border-radius:var(--radius);padding:18px}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(34,197,94,.12);color:var(--green)}
+.badge-amber{background:rgba(245,158,11,.12);color:var(--amber)}
+.badge-red{background:rgba(239,68,68,.12);color:var(--red)}
+.badge-blue{background:rgba(34,197,94,.12);color:var(--accent)}
+
+.section-title{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.countdown-num{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--accent)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--t3)}
+.summary-bar-row{display:flex;align-items:center;gap:8px;font-size:11px;margin-bottom:6px}
+.summary-bar-label{width:110px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.summary-bar-track{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.summary-bar-fill{height:100%;border-radius:99px}
+.summary-bar-val{width:30px;text-align:right;color:var(--t3);font-size:10px}
+
+/* DASHBOARD */
+.dash-wrap{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px}
+.dash-period{display:flex;background:var(--surf2);border-radius:11px;padding:3px;gap:2px;border:1px solid var(--border)}
+.dash-period-btn{flex:1;padding:7px 0;border-radius:9px;text-align:center;font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .18s}
+.dash-period-btn.active{background:var(--accent);color:#000;font-weight:700}
+.dash-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.dash-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dash-grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px}
+.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.dash-stat-num{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;line-height:1;margin-bottom:4px}
+.dash-stat-label{font-size:11px;color:var(--t2);font-weight:500}
+.dash-stat-sub{font-size:10px;color:var(--t3);margin-top:3px}
+.dash-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.hbar-row{margin-bottom:9px}
+.hbar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:4px}
+.hbar-track{height:8px;background:var(--surf3);border-radius:99px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.legend-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.rank-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surf2);border-radius:10px;margin-bottom:6px;border:1px solid var(--border)}
+.rank-num{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;width:24px;text-align:center;color:var(--t3)}
+.rank-num.first{color:var(--accent)}
+@media(max-width:700px){.dash-grid-4{grid-template-columns:1fr 1fr}.dash-grid-2{grid-template-columns:1fr}.dash-grid-3{grid-template-columns:1fr}}
+
+/* METAS */
+.metas-wrap{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:0}
+.metas-col{flex:1;display:flex;flex-direction:column;min-width:0}
+.metas-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;flex:1;min-height:0}
+.meta-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;min-height:200px}
+.meta-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.meta-section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+.meta-add-row{display:flex;gap:8px;margin-bottom:12px}
+.meta-add-input{flex:1;font-size:13px;padding:9px 13px;border-radius:var(--radius-sm);background:var(--surf2);border:1px solid var(--border2);color:var(--t1);outline:none;transition:border-color .2s,box-shadow .2s}
+.meta-add-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,197,94,.1)}
+.meta-add-input::placeholder{color:var(--t3)}
+.meta-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surf2);border:1px solid var(--border);margin-bottom:7px;transition:all .18s;cursor:default;group:true}
+.meta-item:hover{border-color:var(--border2)}
+.meta-item.done{opacity:.5}
+.meta-item.done .meta-titulo{text-decoration:line-through;color:var(--t3)}
+.meta-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .18s;margin-top:1px}
+.meta-check:hover{border-color:var(--accent)}
+.meta-check.done{background:var(--accent);border-color:var(--accent)}
+.meta-titulo{font-size:13px;font-weight:500;flex:1;line-height:1.4;word-break:break-word}
+.meta-desc{font-size:11px;color:var(--t2);margin-top:3px;line-height:1.4}
+.meta-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.meta-tag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600}
+.meta-actions{display:flex;gap:2px;opacity:0;transition:opacity .15s;flex-shrink:0}
+.meta-item:hover .meta-actions{opacity:1}
+.meta-prio-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.meta-filter-row{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.meta-filter-btn{padding:5px 13px;border-radius:8px;font-size:12px;font-weight:500;color:var(--t2);border:1px solid var(--border2);cursor:pointer;transition:all .18s}
+.meta-filter-btn.active{background:rgba(34,197,94,.12);color:var(--accent);border-color:rgba(34,197,94,.25)}
+.meta-progress{margin-bottom:6px}
+.meta-progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:3px}
+.meta-cat-badge{font-size:10px;padding:2px 8px;border-radius:5px;font-weight:600;flex-shrink:0;letter-spacing:.2px}
+.meta-cat-tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;border:1.5px solid var(--border2);color:var(--t2);background:transparent}
+.meta-cat-tab.active-pessoal{background:rgba(129,140,248,.15);color:#818CF8;border-color:rgba(129,140,248,.4)}
+.meta-cat-tab.active-trabalho{background:rgba(245,158,11,.12);color:#F59E0B;border-color:rgba(245,158,11,.35)}
+.meta-cat-tab.active-todas{background:rgba(34,197,94,.12);color:var(--accent);border-color:rgba(34,197,94,.25)}
+.meta-qtd-bar{height:4px;background:var(--surf3);border-radius:99px;overflow:hidden;margin:6px 0 4px}
+.meta-qtd-fill{height:100%;border-radius:99px;transition:width .3s}
+.meta-qtd-row{display:flex;align-items:center;gap:7px;margin-top:2px}
+.meta-qtd-btn{width:24px;height:24px;border-radius:7px;border:1px solid var(--border2);background:var(--surf2);color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;transition:all .15s;flex-shrink:0;line-height:1;padding:0}
+.meta-qtd-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:rgba(34,197,94,.08)}
+.meta-qtd-btn:disabled{opacity:.3;cursor:default}
+.meta-qtd-label{font-size:11px;color:var(--t2);flex:1}
+@media(max-width:800px){.metas-cols{grid-template-columns:1fr}}
+
+/* PINNED SECTION */
+.pinned-section{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:13px;padding:13px 16px;margin-bottom:12px}
+.pinned-header{display:flex;align-items:center;gap:7px;margin-bottom:10px;font-size:12px;font-weight:600;color:var(--amber)}
+
+/* BANNER */
+.banner{display:flex;align-items:center;gap:12px;padding:10px 22px;background:linear-gradient(90deg,rgba(34,197,94,.12),rgba(22,163,74,.08));border-bottom:1px solid rgba(34,197,94,.18);flex-shrink:0}
+
+/* WEEKLY */
+.week-wrap{flex:1;overflow:auto}
+.week-header-row{display:grid;position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border2)}
+.week-body{display:grid}
+.week-time-cell{height:52px;border-bottom:1px solid var(--border);padding:4px 8px;font-size:10px;color:var(--t3);font-weight:500}
+.week-day-cell{position:relative;border-left:1px solid var(--border);border-bottom:1px solid var(--border);height:52px}
+.week-ev{position:absolute;left:2px;right:2px;border-radius:7px;padding:3px 6px;font-size:10px;font-weight:500;overflow:hidden;cursor:pointer;z-index:2}
+
+/* glow effect */
+.glow-green{box-shadow:0 0 20px rgba(34,197,94,.15)}
+
+/* ── MOMENTUM SCROLL em iOS ── */
+.sidebar-nav,.modal-body,.dash-wrap,.metas-wrap,.perfil-wrap,.tl-wrap{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+
+/* ── SIDEBAR OVERLAY (mobile) ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);z-index:299}
+.topbar-burger{display:none;width:36px;height:36px;border-radius:9px;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0}
+.topbar-burger:hover{background:rgba(255,255,255,.07);color:var(--t1)}
+
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:calc(60px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);z-index:200;align-items:flex-start;justify-content:space-around;padding:0 4px;padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--t3);cursor:pointer;transition:color .18s;padding:10px 0 6px;border-radius:0;font-size:9px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;min-width:0;touch-action:manipulation}
+.bnav-item.active{color:var(--accent)}
+.bnav-item.active svg{filter:drop-shadow(0 0 6px rgba(34,197,94,.5))}
+.bnav-item svg{flex-shrink:0}
+
+/* ── RESPONSIVE BREAKPOINTS ── */
+@media(max-width:768px){
+  /* Viewport dinâmico (ajusta quando teclado abre) */
+  #root{height:100dvh}
+
+  /* Sidebar vira drawer overlay */
+  .sidebar{
+    position:fixed!important;left:-270px;top:0;bottom:0;width:280px!important;
+    z-index:300;transition:left .3s cubic-bezier(.4,0,.2,1)!important;
+    box-shadow:none;padding-top:env(safe-area-inset-top);
+  }
+  .sidebar.mobile-open{left:0;box-shadow:8px 0 40px rgba(0,0,0,.7)}
+  .sidebar.collapsed{width:280px!important;left:-290px}
+  .sidebar.collapsed.mobile-open{left:0}
+  .sidebar.collapsed .sidebar-logo-text{opacity:1;width:auto}
+  .sidebar.collapsed .nav-item .label{opacity:1;width:auto;overflow:visible}
+  .sidebar.collapsed .sidebar-user-info{opacity:1;width:auto}
+  .sidebar-overlay{display:block}
+  .sidebar-toggle{display:none}
+  .topbar-burger{display:flex}
+  #sidebar-close-btn{display:flex!important}
+
+  /* Topbar com safe area (notch) */
+  .topbar{
+    padding:0 14px;
+    padding-top:env(safe-area-inset-top);
+    gap:8px;
+    height:calc(56px + env(safe-area-inset-top));
+  }
+  .topbar-title{font-size:15px}
+  .topbar-prox{display:none!important}
+  .topbar-night{display:none!important}
+
+  /* Main content */
+  .main-content{width:100%}
+
+  /* Bottom nav visível */
+  .bottom-nav{display:flex}
+
+  /* Padding para não esconder atrás do bottom nav */
+  .main-content > *:last-child{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+  .dash-wrap,.metas-wrap,.perfil-wrap,.tl-wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
+
+  /* Login */
+  .login-card{padding:28px 20px;border-radius:22px;margin:16px}
+
+  /* ── MODAL MOBILE — sheet bottom ── */
+  .modal-backdrop{padding:0;align-items:flex-end}
+  .modal{
+    border-radius:24px 24px 0 0;
+    /* dvh ajusta quando teclado aparece — sem perder o botão Salvar */
+    max-height:88dvh;
+    max-height:88vh; /* fallback */
+    max-width:100%;
+    width:100%;
+  }
+  .modal-sm{max-width:100%}
+  .modal-header{
+    padding:16px 20px 12px;
+    position:sticky;top:0;z-index:2;
+    background:var(--surface);
+    /* alça de drag visual */
+  }
+  .modal-header::before{
+    content:'';display:block;width:36px;height:4px;border-radius:99px;
+    background:var(--border2);margin:0 auto 12px;
+  }
+  .modal-body{
+    padding:14px 20px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    /* deixa espaço para o footer fixo */
+    padding-bottom:8px;
+  }
+  .modal-footer{
+    padding:12px 20px;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
+    position:sticky;
+    bottom:0;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    z-index:2;
+    /* botões full-width no mobile */
+    flex-direction:row;
+    gap:10px;
+  }
+  .modal-footer .btn{flex:1;justify-content:center;min-height:46px;font-size:14px}
+
+  /* Inputs maiores para evitar zoom no iOS (< 16px causa zoom) */
+  input,textarea,select{font-size:16px!important;min-height:44px;padding:10px 14px}
+  textarea{min-height:unset}
+  select{padding:10px 14px}
+
+  /* Fields lado a lado → empilhados */
+  .field-row{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:repeat(3,1fr)}
+
+  /* Prioridade empilhada em telas menores */
+  .prio-row{flex-wrap:wrap;gap:6px}
+  .prio-btn{flex:1;min-width:calc(33% - 6px);justify-content:center}
+
+  /* Calendário */
+  .cal-header{flex-wrap:wrap;padding:12px 14px 8px;gap:8px}
+  .cal-title{font-size:16px;width:100%}
+  .view-btns{width:100%;justify-content:stretch}
+  .gg-btn-label{display:none}
+  .view-btn{flex:1;text-align:center;padding:8px 0;min-height:38px}
+  .month-day{min-height:52px;padding:5px 4px}
+  .ev-pill{display:none}
+  .painel{display:none}
+
+  /* Dashboard */
+  .dash-wrap{padding:14px;padding-top:16px}
+  .dash-grid-4{grid-template-columns:1fr 1fr}
+  .dash-grid-2{grid-template-columns:1fr}
+  .dash-grid-3{grid-template-columns:1fr}
+  .dash-stat-num{font-size:22px}
+  .dash-card{padding:16px}
+
+  /* Metas */
+  .metas-cols{grid-template-columns:1fr}
+  .metas-wrap{padding:14px}
+  .meta-cat-tab{padding:8px 12px;font-size:11px}
+
+  /* Timeline */
+  .tl-time{width:42px;font-size:9px}
+
+  /* Banner */
+  .banner{padding:8px 14px;gap:8px;flex-wrap:wrap}
+  .banner-text{font-size:12px}
+
+  /* Perfil */
+  .perfil-hero{flex-direction:column;align-items:center;text-align:center;padding:20px 16px}
+  .perfil-wrap{padding:16px 14px}
+  .perfil-hero .perfil-avatar-big,.perfil-hero .perfil-avatar-photo{margin-bottom:4px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+
+  /* Week view */
+  .week-wrap{overflow-x:auto}
+
+  /* Botões com area de toque mínima */
+  .btn{min-height:44px}
+  .btn-sm{min-height:38px}
+  .btn-xs{min-height:32px}
+  .btn-icon{width:40px;height:40px}
+}
+
+@media(max-width:480px){
+  .topbar-time{display:none}
+  .dash-grid-4{grid-template-columns:1fr 1fr}
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .perfil-tabs .perfil-tab span{display:none}
+  .prio-row{flex-direction:column}
+  .prio-btn{width:100%;justify-content:flex-start}
+  .login-card{padding:22px 16px}
+  /* Modal mais compacto em telas muito pequenas */
+  .modal{max-height:92dvh;max-height:92vh}
+  .modal-header{padding:14px 16px 10px}
+  .modal-body{padding:12px 16px}
+  .modal-footer{padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+  /* Metas header compacto */
+  .meta-cat-tab{padding:6px 10px;font-size:10px}
+}
+
+/* PERFIL */
+.perfil-wrap{flex:1;overflow-y:auto;padding:28px 24px;display:flex;flex-direction:column;gap:0;max-width:700px;margin:0 auto;width:100%}
+.perfil-avatar-big{width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,#22C55E,#16A34A);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:30px;color:#000;flex-shrink:0;box-shadow:0 0 0 4px rgba(34,197,94,.18),0 8px 32px rgba(34,197,94,.22)}
+.perfil-hero{display:flex;align-items:center;gap:22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:18px;background:linear-gradient(135deg,rgba(34,197,94,.05),rgba(6,9,6,.0))}
+.perfil-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:14px}
+.perfil-section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);color:var(--t1)}
+.perfil-msg-ok{font-size:12px;color:var(--green);display:flex;align-items:center;gap:5px;margin-top:10px;animation:fadeIn .2s ease}
+.perfil-msg-err{font-size:12px;color:var(--red);display:flex;align-items:center;gap:5px;margin-top:10px}
+.perfil-danger{background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.14);border-radius:var(--radius);padding:22px;margin-bottom:14px}
+.perfil-stat{background:var(--surf2);border-radius:10px;padding:11px 14px;text-align:center;border:1px solid var(--border)}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px}
+.pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--t3);cursor:pointer;transition:color .15s;display:flex;align-items:center;background:none;border:none;padding:0}
+.pw-eye:hover{color:var(--t2)}
+.perfil-tabs{display:flex;background:var(--surf2);border-radius:11px;padding:3px;gap:2px;border:1px solid var(--border);margin-bottom:20px}
+.perfil-tab{flex:1;padding:8px 0;border-radius:9px;text-align:center;font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px}
+.perfil-tab.active{background:var(--surf3);color:var(--t1);border:1px solid var(--border2)}
+.avatar-upload-wrap{position:relative;cursor:pointer;flex-shrink:0}
+.avatar-upload-wrap:hover .avatar-overlay{opacity:1}
+.avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;opacity:0;transition:opacity .2s;color:#fff}
+.avatar-overlay span{font-size:9px;font-weight:600;letter-spacing:.3px}
+.sidebar-avatar-photo{width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.perfil-avatar-photo{width:84px;height:84px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 4px rgba(34,197,94,.18),0 8px 32px rgba(34,197,94,.22)}
+</style>
+</head>
+<body>
+<div id="loading" style="position:fixed;inset:0;background:#060906;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px">
+  <div style="font-family:Syne,sans-serif;font-size:22px;font-weight:800;color:#F0FFF4">Inovit <span style="color:#22C55E">Flow</span></div>
+  <div style="width:36px;height:36px;border:3px solid rgba(34,197,94,.2);border-top-color:#22C55E;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div style="font-size:12px;color:#3A5240">Carregando...</div>
+</div>
+<div id="error-box" style="display:none;position:fixed;inset:0;background:#060906;display:none;align-items:center;justify-content:center;padding:24px">
+  <div style="background:#0A0F0A;border:1px solid rgba(239,68,68,.3);border-radius:16px;padding:28px;max-width:500px;width:100%">
+    <div style="color:#EF4444;font-size:15px;font-weight:700;margin-bottom:12px">Erro ao carregar</div>
+    <pre id="error-msg" style="font-size:11px;color:#7A9A82;white-space:pre-wrap;word-break:break-all"></pre>
+    <div style="margin-top:16px;font-size:12px;color:#3A5240">Tente abrir no <strong style="color:#F0FFF4">Google Chrome</strong> ou <strong style="color:#F0FFF4">Firefox</strong>.</div>
+  </div>
+</div>
+<div id="root"></div>
+<script>
+window.onerror=function(msg,src,line,col,err){
+  document.getElementById('loading').style.display='none';
+  var box=document.getElementById('error-box');
+  box.style.display='flex';
+  document.getElementById('error-msg').textContent=(err?err.stack:msg)+'\n\nLinha: '+line+' Col: '+col;
+};
+window.addEventListener('unhandledrejection',function(e){
+  document.getElementById('loading').style.display='none';
+  var box=document.getElementById('error-box');
+  box.style.display='flex';
+  document.getElementById('error-msg').textContent=String(e.reason);
+});
+</script>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo} = React;
+
+/* ─────────── SVG ICONS ─────────── */
+const Ic = {
+  Menu:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+  X:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  Calendar:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  Plan:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+  Today:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  User:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  LogOut:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+  ChevL:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
+  ChevR:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  Plus:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Edit:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  Trash:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>,
+  Check:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  Pin:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+  Unpin:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 10a9 9 0 00-14.84-6.84M3.34 3.34A9 9 0 003 10c0 7 9 13 9 13a24.6 24.6 0 005.13-4"/></svg>,
+  Bell:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>,
+  Moon:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>,
+  Star:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill={c} stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  Undo:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/></svg>,
+  Eye:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+  Dash:({s=18,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="7" height="7" rx="1"/><rect x="15" y="3" width="7" height="7" rx="1"/><rect x="2" y="14" width="7" height="7" rx="1"/><rect x="15" y="14" width="7" height="7" rx="1"/></svg>,
+  TrendUp:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+  Award:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
+  Target:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  Flag:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>,
+  Circle:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>,
+  CheckCircle:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+  Sun:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
+  EyeOff:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
+  Lock:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>,
+  Key:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>,
+  Shield:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  AtSign:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94"/></svg>,
+  AlertTriangle:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  Info:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+  Clock:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  Camera:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>,
+  ImageOff:({s=16,c='currentColor'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M10.41 10.41a2 2 0 102.83 2.83"/><line x1="13.5" y1="6.5" x2="14" y2="6"/><path d="M14 2H6a2 2 0 00-2 2v14"/><path d="M20.59 13.41A2 2 0 0121 14.83V20a2 2 0 01-2 2H7"/></svg>,
+  Refresh:({s=16,c='currentColor',spin})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={spin?{animation:'spin 1s linear infinite'}:{}}><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>,
+  Google:({s=16})=><svg width={s} height={s} viewBox="0 0 48 48"><path fill="#4285F4" d="M43.6 20.5H24v8h11.3C33.7 32.2 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.3 1 7.2 2.7l5.7-5.7C33.2 7.3 28.8 5 24 5 13.5 5 5 13.5 5 24s8.5 19 19 19 19-8.5 19-19c0-1.3-.1-2.5-.4-3.5z"/><path fill="#34A853" d="M6.3 14.7l6.6 4.8C14.5 16 19 13 24 13c2.8 0 5.3 1 7.2 2.7l5.7-5.7C33.2 7.3 28.8 5 24 5c-7.7 0-14.3 4.5-17.7 9.7z"/><path fill="#FBBC05" d="M24 43c5.1 0 9.8-2 13.2-5.2l-6.1-5.2C29.3 34.1 26.8 35 24 35c-5.2 0-9.7-3.3-11.3-8H6.3C9.7 34.7 16.3 43 24 43z"/><path fill="#EA4335" d="M43.6 20.5H24v8h11.3c-.8 2.2-2.3 4.2-4.2 5.6l6.1 5.2C40 36.2 43 30.6 43 24c0-1.3-.1-2.5-.4-3.5z"/></svg>,
+};
+
+/* ─────────── CONSTANTS ─────────── */
+const CATS_EV=[
+  {id:'reuniao',label:'Reunião',icon:'👥',cor:'#22C55E'},
+  {id:'pessoal',label:'Pessoal',icon:'👤',cor:'#4ADE80'},
+  {id:'trabalho',label:'Trabalho',icon:'💼',cor:'#F59E0B'},
+  {id:'atleta',label:'Atleta',icon:'⚽',cor:'#22C55E'},
+  {id:'equipe',label:'Equipe',icon:'🤝',cor:'#06B6D4'},
+  {id:'saude',label:'Saúde',icon:'❤️',cor:'#EF4444'},
+  {id:'estudo',label:'Estudo',icon:'📚',cor:'#86EFAC'},
+  {id:'outros',label:'Outros',icon:'🔖',cor:'#94A3B8'},
+];
+const CATS_ROT=[
+  {id:'treino',label:'Treino',icon:'💪',cor:'#4ade80'},
+  {id:'alimentacao',label:'Alimentação',icon:'🍽️',cor:'#fb923c'},
+  {id:'trabalho',label:'Trabalho',icon:'💼',cor:'#a78bfa'},
+  {id:'estudo',label:'Estudo',icon:'📖',cor:'#60a5fa'},
+  {id:'saude_bem',label:'Bem-estar',icon:'🧘',cor:'#f472b6'},
+  {id:'descanso',label:'Descanso',icon:'😴',cor:'#94a3b8'},
+  {id:'casa',label:'Casa',icon:'🏠',cor:'#fbbf24'},
+  {id:'livre',label:'Livre',icon:'🌀',cor:'#334155'},
+];
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DIAS_F=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+/* ─────────── STORAGE (user-scoped) ─────────── */
+const makeStore=(uid)=>({
+  evs:()=>JSON.parse(localStorage.getItem(`if_ev_${uid}`)||'[]'),
+  saveEvs:(d)=>localStorage.setItem(`if_ev_${uid}`,JSON.stringify(d)),
+  plans:()=>JSON.parse(localStorage.getItem(`if_pl_${uid}`)||'{}'),
+  savePlans:(d)=>localStorage.setItem(`if_pl_${uid}`,JSON.stringify(d)),
+  pinned:()=>JSON.parse(localStorage.getItem(`if_pin_${uid}`)||'[]'),
+  savePinned:(d)=>localStorage.setItem(`if_pin_${uid}`,JSON.stringify(d)),
+  metas:()=>JSON.parse(localStorage.getItem(`if_mt_${uid}`)||'[]'),
+  saveMetas:(d)=>localStorage.setItem(`if_mt_${uid}`,JSON.stringify(d)),
+});
+const authStore={
+  users:()=>JSON.parse(localStorage.getItem('if_users')||'[]'),
+  saveUsers:(d)=>localStorage.setItem('if_users',JSON.stringify(d)),
+  session:()=>JSON.parse(localStorage.getItem('if_session')||'null'),
+  saveSession:(d)=>localStorage.setItem('if_session',JSON.stringify(d)),
+  clearSession:()=>localStorage.removeItem('if_session'),
+  photo:(uid)=>localStorage.getItem(`if_photo_${uid}`)||null,
+  savePhoto:(uid,data)=>{if(data)localStorage.setItem(`if_photo_${uid}`,data);else localStorage.removeItem(`if_photo_${uid}`);},
+};
+
+/* ─────────── GOOGLE CALENDAR ─────────── */
+const GG={
+  BASE:'https://www.googleapis.com/calendar/v3',
+  SCOPE:'https://www.googleapis.com/auth/calendar',
+  clientId:()=>localStorage.getItem('if_gg_cid')||'',
+  token:()=>localStorage.getItem('if_gg_tok')||'',
+  connected:()=>localStorage.getItem('if_gg_on')==='1'&&!!localStorage.getItem('if_gg_tok'),
+  expired:()=>Date.now()>Number(localStorage.getItem('if_gg_exp')||0)-30000,
+  saveToken(tok,exp){localStorage.setItem('if_gg_tok',tok);localStorage.setItem('if_gg_exp',String(Date.now()+exp*1000));localStorage.setItem('if_gg_on','1');},
+  saveCid:(id)=>localStorage.setItem('if_gg_cid',id.trim()),
+  disconnect(){localStorage.removeItem('if_gg_tok');localStorage.removeItem('if_gg_exp');localStorage.setItem('if_gg_on','0');},
+  async req(path,opts={}){
+    const r=await fetch(GG.BASE+path,{...opts,headers:{Authorization:`Bearer ${GG.token()}`,'Content-Type':'application/json',...(opts.headers||{})}});
+    if(r.status===204)return null;
+    const txt=await r.text();
+    if(!r.ok){const err=new Error(`GG ${r.status}`);err.status=r.status;throw err;}
+    return JSON.parse(txt);
+  },
+};
+
+let _ggClient=null;
+function ggEnsureClient(){
+  return new Promise((res,rej)=>{
+    const cid=GG.clientId();
+    if(!cid){rej('no_client_id');return;}
+    const setup=()=>{
+      if(!window.google?.accounts?.oauth2)return false;
+      _ggClient=window.google.accounts.oauth2.initTokenClient({client_id:cid,scope:GG.SCOPE,callback:()=>{}});
+      return true;
+    };
+    if(setup()){res();return;}
+    let n=0;
+    const t=setInterval(()=>{n++;if(setup()){clearInterval(t);res();}else if(n>50){clearInterval(t);rej('gis_not_loaded');}},200);
+  });
+}
+
+function ggRequestToken(prompt=''){
+  return new Promise((res,rej)=>{
+    if(!_ggClient){rej('not_init');return;}
+    _ggClient.callback=(r)=>{if(r.error){rej(r.error);return;}GG.saveToken(r.access_token,r.expires_in);res(r.access_token);};
+    _ggClient.requestAccessToken({prompt});
+  });
+}
+
+const GG_TZ=()=>Intl.DateTimeFormat().resolvedOptions().timeZone;
+function evToGG(ev){
+  return{
+    summary:ev.titulo,
+    description:[ev.descricao,ev.participantes?`Participantes: ${ev.participantes}`:''].filter(Boolean).join('\n'),
+    location:ev.local||'',
+    start:{dateTime:`${ev.dataInicio}T${ev.horaInicio||'09:00'}:00`,timeZone:GG_TZ()},
+    end:{dateTime:`${ev.dataInicio}T${ev.horaFim||'10:00'}:00`,timeZone:GG_TZ()},
+  };
+}
+function evFromGG(gev){
+  const d=(gev.start?.dateTime||gev.start?.date||'').slice(0,10);
+  const hs=(gev.start?.dateTime||'').slice(11,16)||'09:00';
+  const he=(gev.end?.dateTime||'').slice(11,16)||'10:00';
+  return{id:uid(),googleId:gev.id,fromGoogle:true,titulo:gev.summary||'(sem título)',descricao:gev.description||'',local:gev.location||'',participantes:'',dataInicio:d,horaInicio:hs,horaFim:he,categoria:'reuniao',cor:'#22C55E',recorrencia:'nenhuma',diasSemana:[],diaDoMes:1,fixo:false,prioridade:'media',lembrete:null,realizado:false,criadoEm:gev.created||new Date().toISOString()};
+}
+
+async function ggPullAndMerge(localEvs){
+  const now=new Date();
+  const tMin=new Date(now.getFullYear(),now.getMonth()-1,1).toISOString();
+  const tMax=new Date(now.getFullYear(),now.getMonth()+4,1).toISOString();
+  const data=await GG.req(`/calendars/primary/events?timeMin=${encodeURIComponent(tMin)}&timeMax=${encodeURIComponent(tMax)}&singleEvents=true&maxResults=500&orderBy=startTime`);
+  const gEvs=(data?.items||[]).filter(e=>e.status!=='cancelled');
+  const gMap=new Map(gEvs.map(e=>[e.id,e]));
+  let merged=localEvs.filter(e=>!e.fromGoogle||gMap.has(e.googleId));
+  gEvs.forEach(gev=>{
+    const idx=merged.findIndex(e=>e.googleId===gev.id);
+    const c=evFromGG(gev);
+    if(idx>=0)merged[idx]={...merged[idx],titulo:c.titulo,descricao:c.descricao,local:c.local,dataInicio:c.dataInicio,horaInicio:c.horaInicio,horaFim:c.horaFim,fromGoogle:true};
+    else merged.push(c);
+  });
+  return merged;
+}
+async function ggCreate(ev){const d=await GG.req('/calendars/primary/events',{method:'POST',body:JSON.stringify(evToGG(ev))});return d?.id;}
+async function ggUpdate(googleId,ev){await GG.req(`/calendars/primary/events/${googleId}`,{method:'PUT',body:JSON.stringify(evToGG(ev))});}
+async function ggDeleteEv(googleId){await fetch(`${GG.BASE}/calendars/primary/events/${googleId}`,{method:'DELETE',headers:{Authorization:`Bearer ${GG.token()}`}});}
+
+/* ─────────── DATE UTILS ─────────── */
+const toYMD=(d)=>{const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${dd}`;};
+const fromYMD=(s)=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
+const today=()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate());};
+const tomorrow=()=>{const t=today();t.setDate(t.getDate()+1);return t;};
+const addDays=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r;};
+const fmtDate=(d)=>`${DIAS_F[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
+const fmtShort=(d)=>`${d.getDate()}/${d.getMonth()+1}`;
+const nowTime=()=>{const n=new Date();return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;};
+const toMins=(hm)=>{if(!hm)return 0;const[h,m]=hm.split(':').map(Number);return h*60+m;};
+const toHM=(mins)=>`${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
+const daysInMonth=(y,m)=>new Date(y,m+1,0).getDate();
+const firstDow=(y,m)=>new Date(y,m,1).getDay();
+const uid=()=>crypto.randomUUID();
+const hex2rgba=(hex,a)=>{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${a})`;};
+
+const getEvForDate=(evs,ymd)=>{
+  const d=fromYMD(ymd);const dow=d.getDay();const dom=d.getDate();
+  return evs.filter(ev=>{
+    if(ev.fixo&&ev.recorrencia!=='nenhuma'){
+      if(ev.recorrencia==='diaria')return true;
+      if(ev.recorrencia==='semanal'&&ev.diasSemana?.includes(dow))return true;
+      if(ev.recorrencia==='mensal'&&ev.diaDoMes===dom)return true;
+    }
+    return ev.dataInicio===ymd;
+  }).sort((a,b)=>toMins(a.horaInicio)-toMins(b.horaInicio));
+};
+const catEv=(id)=>CATS_EV.find(c=>c.id===id)||CATS_EV[7];
+const catRot=(id)=>CATS_ROT.find(c=>c.id===id)||CATS_ROT[7];
+
+/* ─────────── TOGGLE ─────────── */
+function Toggle({value,onChange}){
+  return(
+    <label className="toggle" onClick={()=>onChange(!value)}>
+      <input type="checkbox" checked={value} readOnly/>
+      <div className="toggle-track"/>
+      <div className="toggle-thumb"/>
+    </label>
+  );
+}
+
+/* ─────────── MODAL WRAPPER ─────────── */
+function Modal({onClose,children,sm}){
+  useEffect(()=>{
+    const h=(e)=>{if(e.key==='Escape')onClose();};
+    window.addEventListener('keydown',h);
+    return()=>window.removeEventListener('keydown',h);
+  },[onClose]);
+  return(
+    <div className="modal-backdrop" onClick={(e)=>{if(e.target===e.currentTarget)onClose();}}>
+      <div className={`modal slide-up ${sm?'modal-sm':''}`}>{children}</div>
+    </div>
+  );
+}
+
+/* ─────────── LOGIN PAGE ─────────── */
+function LoginPage({onLogin}){
+  const [tab,setTab]=useState('entrar');
+  const [form,setForm]=useState({username:'',password:'',confirm:''});
+  const [err,setErr]=useState('');
+  const [showPw,setShowPw]=useState(false);
+  const upd=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  const handleLogin=()=>{
+    setErr('');
+    if(!form.username.trim()||!form.password)return setErr('Preencha todos os campos.');
+    const users=authStore.users();
+    const user=users.find(u=>u.username.toLowerCase()===form.username.trim().toLowerCase()&&u.password===form.password);
+    if(!user)return setErr('Usuário ou senha incorretos.');
+    const session={userId:user.id,username:user.username};
+    authStore.saveSession(session);
+    onLogin(session);
+  };
+  const handleRegister=()=>{
+    setErr('');
+    if(!form.username.trim()||!form.password)return setErr('Preencha todos os campos.');
+    if(form.password!==form.confirm)return setErr('Senhas não coincidem.');
+    if(form.password.length<4)return setErr('Senha muito curta (mínimo 4 caracteres).');
+    const users=authStore.users();
+    if(users.find(u=>u.username.toLowerCase()===form.username.trim().toLowerCase()))return setErr('Nome de usuário já existe.');
+    const newUser={id:uid(),username:form.username.trim(),password:form.password,criadoEm:new Date().toISOString()};
+    authStore.saveUsers([...users,newUser]);
+    const session={userId:newUser.id,username:newUser.username};
+    authStore.saveSession(session);
+    onLogin(session);
+  };
+
+  return(
+    <div className="login-page">
+      <div className="login-bg"/>
+      <div className="login-card slide-up">
+        <div className="login-logo">
+          <span style={{color:'#F0FFF4'}}>Inovit </span>
+          <span style={{color:'#22C55E'}}>Flow</span>
+        </div>
+        <div className="login-sub">Sua agenda inteligente de produtividade</div>
+        <div className="login-tabs">
+          <div className={`login-tab ${tab==='entrar'?'active':''}`} onClick={()=>{setTab('entrar');setErr('');}}>Entrar</div>
+          <div className={`login-tab ${tab==='criar'?'active':''}`} onClick={()=>{setTab('criar');setErr('');}}>Criar conta</div>
+        </div>
+        <div className="login-field">
+          <label>Usuário</label>
+          <div style={{position:'relative'}}>
+            <span style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--t3)'}}><Ic.User s={15}/></span>
+            <input style={{paddingLeft:34}} value={form.username} onChange={e=>upd('username',e.target.value)} placeholder="Seu nome de usuário" onKeyDown={e=>e.key==='Enter'&&(tab==='entrar'?handleLogin():handleRegister())}/>
+          </div>
+        </div>
+        <div className="login-field">
+          <label>Senha</label>
+          <div style={{position:'relative'}}>
+            <span style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--t3)'}}><Ic.Lock s={15}/></span>
+            <input style={{paddingLeft:34,paddingRight:36}} type={showPw?'text':'password'} value={form.password} onChange={e=>upd('password',e.target.value)} placeholder="Sua senha" onKeyDown={e=>e.key==='Enter'&&(tab==='entrar'?handleLogin():handleRegister())}/>
+            <button onClick={()=>setShowPw(p=>!p)} style={{position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',color:'var(--t3)',cursor:'pointer'}}>{showPw?<Ic.EyeOff s={15}/>:<Ic.Eye s={15}/>}</button>
+          </div>
+        </div>
+        {tab==='criar'&&(
+          <div className="login-field">
+            <label>Confirmar Senha</label>
+            <div style={{position:'relative'}}>
+              <span style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--t3)'}}><Ic.Lock s={15}/></span>
+              <input style={{paddingLeft:34}} type={showPw?'text':'password'} value={form.confirm} onChange={e=>upd('confirm',e.target.value)} placeholder="Repita a senha" onKeyDown={e=>e.key==='Enter'&&handleRegister()}/>
+            </div>
+          </div>
+        )}
+        {err&&<div className="login-err">{err}</div>}
+        <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'11px',marginTop:4}} onClick={tab==='entrar'?handleLogin:handleRegister}>
+          {tab==='entrar'?'Entrar':'Criar conta'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── EVENTO MODAL ─────────── */
+function EventoModal({evento,dataDefault,onSave,onClose}){
+  const blank={id:uid(),titulo:'',descricao:'',categoria:'reuniao',cor:'#22C55E',dataInicio:dataDefault||toYMD(today()),horaInicio:'09:00',horaFim:'10:00',local:'',participantes:'',recorrencia:'nenhuma',diasSemana:[],diaDoMes:1,fixo:false,prioridade:'media',lembrete:null,realizado:false,criadoEm:new Date().toISOString()};
+  const [f,setF]=useState(evento||blank);
+  const upd=(k,v)=>setF(p=>({...p,[k]:v}));
+  const handleSave=()=>{
+    if(!f.titulo.trim())return alert('Informe o título.');
+    const cat=CATS_EV.find(c=>c.id===f.categoria);
+    onSave({...f,cor:cat?.cor||f.cor});
+  };
+  const toggleDow=(d)=>upd('diasSemana',f.diasSemana.includes(d)?f.diasSemana.filter(x=>x!==d):[...f.diasSemana,d]);
+  return(
+    <Modal onClose={onClose}>
+      <div className="modal-header">
+        <span className="modal-title">{evento?'Editar Evento':'Novo Evento'}</span>
+        <button className="btn-icon" onClick={onClose}><Ic.X/></button>
+      </div>
+      <div className="modal-body">
+        <div className="field"><label>Título *</label><input value={f.titulo} onChange={e=>upd('titulo',e.target.value)} placeholder="Nome do evento"/></div>
+        <div className="field"><label>Descrição</label><textarea rows={2} value={f.descricao} onChange={e=>upd('descricao',e.target.value)} placeholder="Observações..."/></div>
+        <div className="field">
+          <label>Categoria</label>
+          <div className="cat-grid">
+            {CATS_EV.map(c=>(
+              <div key={c.id} className={`cat-option ${f.categoria===c.id?'selected':''}`}
+                style={f.categoria===c.id?{borderColor:c.cor,background:hex2rgba(c.cor,0.13)}:{}}
+                onClick={()=>upd('categoria',c.id)}>
+                <span style={{fontSize:18}}>{c.icon}</span>
+                <span style={{fontSize:9,lineHeight:1.2,color:f.categoria===c.id?c.cor:'var(--t2)'}}>{c.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="field-row">
+          <div className="field"><label>Data</label><input type="date" value={f.dataInicio} onChange={e=>upd('dataInicio',e.target.value)}/></div>
+          <div className="field" style={{marginBottom:0}}/>
+        </div>
+        <div className="field-row">
+          <div className="field"><label>Início</label><input type="time" value={f.horaInicio} onChange={e=>upd('horaInicio',e.target.value)}/></div>
+          <div className="field"><label>Fim</label><input type="time" value={f.horaFim} onChange={e=>upd('horaFim',e.target.value)}/></div>
+        </div>
+        <div className="field-row">
+          <div className="field"><label>Local / Link</label><input value={f.local} onChange={e=>upd('local',e.target.value)} placeholder="Opcional"/></div>
+          <div className="field"><label>Participantes</label><input value={f.participantes} onChange={e=>upd('participantes',e.target.value)} placeholder="Com quem?"/></div>
+        </div>
+        <div className="field">
+          <label>Recorrência</label>
+          <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+            {[['nenhuma','Não repete'],['diaria','Diário'],['semanal','Semanal'],['mensal','Mensal']].map(([v,l])=>(
+              <button key={v} onClick={()=>upd('recorrencia',v)}
+                style={{padding:'5px 12px',borderRadius:8,border:`1.5px solid ${f.recorrencia===v?'var(--accent)':'var(--border2)'}`,background:f.recorrencia===v?'rgba(34,197,94,.12)':'transparent',color:f.recorrencia===v?'var(--accent)':'var(--t2)',fontSize:12,cursor:'pointer'}}>
+                {l}
+              </button>
+            ))}
+          </div>
+          {f.recorrencia==='semanal'&&(
+            <div className="days-row">{DIAS.map((d,i)=>(
+              <div key={i} className={`day-chip ${f.diasSemana.includes(i)?'active':''}`} onClick={()=>toggleDow(i)}>{d}</div>
+            ))}</div>
+          )}
+          {f.recorrencia==='mensal'&&<input type="number" min={1} max={31} value={f.diaDoMes} onChange={e=>upd('diaDoMes',Number(e.target.value))} style={{width:80,marginTop:8}} placeholder="Dia"/>}
+        </div>
+        <div className="field">
+          <div className="toggle-row">
+            <div><div style={{fontWeight:500,fontSize:13}}>Evento fixo</div><div style={{fontSize:11,color:'var(--t2)',marginTop:1}}>Recorrente permanente</div></div>
+            <Toggle value={f.fixo} onChange={v=>upd('fixo',v)}/>
+          </div>
+        </div>
+        <div className="field">
+          <label>Prioridade</label>
+          <div className="prio-row">
+            {[['alta','Alta','var(--red)'],['media','Média','var(--amber)'],['baixa','Baixa','var(--green)']].map(([v,l,cor])=>(
+              <button key={v} className="prio-btn" onClick={()=>upd('prioridade',v)}
+                style={f.prioridade===v?{borderColor:cor,background:hex2rgba(cor.includes('red')?'#EF4444':cor.includes('amber')?'#F59E0B':'#22C55E',0.13),color:cor}:{}}>
+                {v==='alta'?'🔴':v==='media'?'🟡':'🟢'} {l}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label>Lembrete</label>
+          <select value={f.lembrete||''} onChange={e=>upd('lembrete',e.target.value?Number(e.target.value):null)}>
+            <option value="">Sem lembrete</option>
+            {[[15,'15 min'],[30,'30 min'],[60,'1 hora'],[1440,'1 dia']].map(([v,l])=><option key={v} value={v}>{l} antes</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="modal-footer">
+        <button className="btn btn-ghost" onClick={onClose}>Cancelar</button>
+        <button className="btn btn-primary" onClick={handleSave}><Ic.Check s={14}/> Salvar Evento</button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ─────────── BLOCO MODAL ─────────── */
+function BlocoModal({bloco,data,horaDefault,onSave,onClose}){
+  const blank={id:uid(),data:data||toYMD(today()),titulo:'',categoria:'trabalho',cor:'#a78bfa',horaInicio:horaDefault||'09:00',horaFim:toHM(toMins(horaDefault||'09:00')+60),observacao:'',tipoOrigem:'rotina',eventoId:null,concluido:false,concluidoEm:null,fixo:false};
+  const [f,setF]=useState(bloco||blank);
+  const upd=(k,v)=>setF(p=>({...p,[k]:v}));
+  const handleSave=()=>{
+    if(!f.titulo.trim())return alert('Informe o título.');
+    const cat=CATS_ROT.find(c=>c.id===f.categoria);
+    onSave({...f,cor:cat?.cor||f.cor});
+  };
+  return(
+    <Modal onClose={onClose} sm>
+      <div className="modal-header">
+        <span className="modal-title">{bloco?'Editar Bloco':'Novo Bloco'}</span>
+        <button className="btn-icon" onClick={onClose}><Ic.X/></button>
+      </div>
+      <div className="modal-body">
+        <div className="field"><label>Atividade</label><input value={f.titulo} onChange={e=>upd('titulo',e.target.value)} placeholder="Ex: Café da manhã, Treino..."/></div>
+        <div className="field-row">
+          <div className="field"><label>Início</label><input type="time" value={f.horaInicio} onChange={e=>upd('horaInicio',e.target.value)}/></div>
+          <div className="field"><label>Fim</label><input type="time" value={f.horaFim} onChange={e=>upd('horaFim',e.target.value)}/></div>
+        </div>
+        <div className="field">
+          <label>Categoria</label>
+          <div className="cat-grid">
+            {CATS_ROT.map(c=>(
+              <div key={c.id} className={`cat-option ${f.categoria===c.id?'selected':''}`}
+                style={f.categoria===c.id?{borderColor:c.cor,background:hex2rgba(c.cor,0.14)}:{}}
+                onClick={()=>upd('categoria',c.id)}>
+                <span style={{fontSize:17}}>{c.icon}</span>
+                <span style={{fontSize:9,lineHeight:1.2,color:f.categoria===c.id?c.cor:'var(--t2)'}}>{c.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="field"><label>Observação</label><input value={f.observacao} onChange={e=>upd('observacao',e.target.value)} placeholder="Rápida anotação (opcional)"/></div>
+        <div className="field">
+          <div className="toggle-row">
+            <div>
+              <div style={{fontWeight:500,fontSize:13,display:'flex',alignItems:'center',gap:6}}><Ic.Pin s={14} c='var(--amber)'/> Fixar atividade</div>
+              <div style={{fontSize:11,color:'var(--t2)',marginTop:1}}>Aparece automaticamente todo dia</div>
+            </div>
+            <Toggle value={f.fixo||false} onChange={v=>upd('fixo',v)}/>
+          </div>
+        </div>
+      </div>
+      <div className="modal-footer">
+        <button className="btn btn-ghost btn-sm" onClick={onClose}>Cancelar</button>
+        <button className="btn btn-primary btn-sm" onClick={handleSave}><Ic.Plus s={13}/> Adicionar</button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ─────────── CALENDARIO MENSAL ─────────── */
+function CalMensal({ano,mes,eventos,diaAtivo,onDiaClick}){
+  const fim=daysInMonth(ano,mes);const ini=firstDow(ano,mes);
+  const cells=[];const todayYMD=toYMD(today());
+  for(let i=0;i<ini;i++)cells.push({date:new Date(ano,mes,1-ini+i),outro:true});
+  for(let d=1;d<=fim;d++)cells.push({date:new Date(ano,mes,d),outro:false});
+  const rem=(7-cells.length%7)%7;
+  for(let i=1;i<=rem;i++)cells.push({date:new Date(ano,mes+1,i),outro:true});
+  return(
+    <div style={{flex:1,overflow:'auto',padding:'0 20px 20px'}}>
+      <div className="month-grid">
+        {DIAS.map(d=><div key={d} className="month-dow">{d}</div>)}
+        {cells.map((cell,i)=>{
+          const ymd=toYMD(cell.date);
+          const evs=getEvForDate(eventos,ymd);
+          const isToday=ymd===todayYMD;const isSel=ymd===diaAtivo;
+          return(
+            <div key={i} className={`month-day${cell.outro?' other-month':''}${isSel?' selected':''}`} onClick={()=>onDiaClick(ymd)}>
+              <div className="day-num" style={isToday?{background:'var(--accent)',color:'#fff'}:{}}>
+                {cell.date.getDate()}
+              </div>
+              {evs.slice(0,3).map(ev=>(
+                <div key={ev.id} className="ev-pill" style={{background:hex2rgba(ev.cor,0.2),color:ev.cor}}>
+                  {ev.horaInicio} {ev.titulo}
+                </div>
+              ))}
+              {evs.length>3&&<div style={{fontSize:9,color:'var(--t3)',marginTop:2}}>+{evs.length-3}</div>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── CALENDARIO SEMANAL ─────────── */
+function CalSemanal({dataRef,eventos,onEventoClick}){
+  const ini=new Date(dataRef);ini.setDate(dataRef.getDate()-dataRef.getDay());
+  const dias=Array.from({length:7},(_,i)=>addDays(ini,i));
+  const horas=Array.from({length:24},(_,i)=>i);
+  const todayYMD=toYMD(today());
+  const cols=`60px repeat(7,1fr)`;
+  return(
+    <div className="week-wrap">
+      <div style={{display:'grid',gridTemplateColumns:cols,minWidth:580}}>
+        <div style={{height:50,borderBottom:'1px solid var(--border)',position:'sticky',top:0,background:'var(--surface)',zIndex:10}}/>
+        {dias.map((d,i)=>{
+          const ymd=toYMD(d);const isT=ymd===todayYMD;
+          return(
+            <div key={i} style={{height:50,borderBottom:'1px solid var(--border2)',borderLeft:'1px solid var(--border)',position:'sticky',top:0,background:'var(--surface)',zIndex:10,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+              <span style={{fontSize:10,color:'var(--t3)',textTransform:'uppercase',fontWeight:600}}>{DIAS[d.getDay()]}</span>
+              <div style={{width:26,height:26,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',background:isT?'var(--accent)':'transparent',color:isT?'#fff':'var(--t1)',fontWeight:600,fontSize:13,marginTop:2}}>{d.getDate()}</div>
+            </div>
+          );
+        })}
+        {horas.map(h=>(
+          <React.Fragment key={h}>
+            <div className="week-time-cell">{String(h).padStart(2,'0')}:00</div>
+            {dias.map((d,di)=>{
+              const ymd=toYMD(d);
+              const evs=getEvForDate(eventos,ymd).filter(ev=>Math.floor(toMins(ev.horaInicio)/60)===h);
+              return(
+                <div key={di} className="week-day-cell">
+                  {evs.map(ev=>{
+                    const top=(toMins(ev.horaInicio)%60)/60*52;
+                    const dur=Math.max(20,toMins(ev.horaFim)-toMins(ev.horaInicio));
+                    const height=Math.min((dur/60)*52,200);
+                    return(
+                      <div key={ev.id} className="week-ev" onClick={()=>onEventoClick(ev)}
+                        style={{top,height,background:hex2rgba(ev.cor,0.2),borderLeft:`3px solid ${ev.cor}`,color:ev.cor}}>
+                        {ev.titulo}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── CALENDARIO DIARIO ─────────── */
+function CalDiario({data,eventos,onEventoClick}){
+  const ymd=toYMD(data);const evs=getEvForDate(eventos,ymd);
+  const horas=Array.from({length:24},(_,i)=>i);
+  const isToday=ymd===toYMD(today());
+  const [nowMins,setNowMins]=useState(toMins(nowTime()));
+  const lineRef=useRef(null);
+  useEffect(()=>{const iv=setInterval(()=>setNowMins(toMins(nowTime())),60000);return()=>clearInterval(iv);},[]);
+  useEffect(()=>{if(isToday&&lineRef.current)lineRef.current.scrollIntoView({block:'center'});},[isToday]);
+  return(
+    <div style={{flex:1,overflow:'auto',padding:'0 20px 20px'}}>
+      {horas.map(h=>{
+        const hEvs=evs.filter(ev=>Math.floor(toMins(ev.horaInicio)/60)===h);
+        const showLine=isToday&&Math.floor(nowMins/60)===h;
+        const lineTop=showLine?(nowMins%60)/60*52:null;
+        return(
+          <div key={h} style={{display:'flex',minHeight:52,borderBottom:'1px solid var(--border)'}}>
+            <div style={{width:58,flexShrink:0,padding:'4px 10px 0',fontSize:10,color:'var(--t3)',fontWeight:500}}>{String(h).padStart(2,'0')}:00</div>
+            <div style={{flex:1,padding:'2px 8px',position:'relative',minHeight:52}}>
+              {lineTop!==null&&(
+                <div ref={lineRef} style={{position:'absolute',left:0,right:0,top:lineTop,height:2,background:'var(--red)',zIndex:5}}>
+                  <div style={{width:8,height:8,background:'var(--red)',borderRadius:'50%',position:'absolute',left:-4,top:-3,animation:'pulseDot 1.5s infinite'}}/>
+                </div>
+              )}
+              {hEvs.map(ev=>(
+                <div key={ev.id} onClick={()=>onEventoClick(ev)}
+                  style={{borderRadius:9,padding:'6px 10px',marginBottom:4,cursor:'pointer',background:hex2rgba(ev.cor,0.14),borderLeft:`3px solid ${ev.cor}`}}>
+                  <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                    <span style={{fontSize:10,color:ev.cor,fontWeight:600,fontVariantNumeric:'tabular-nums'}}>{ev.horaInicio}–{ev.horaFim}</span>
+                    <span style={{fontSize:13,fontWeight:600}}>{ev.titulo}</span>
+                  </div>
+                  {ev.local&&<div style={{fontSize:11,color:'var(--t2)',marginTop:2}}>{ev.local}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────── PAINEL DIA ─────────── */
+function PainelDia({diaYMD,eventos,onNovoEvento,onEditEvento,onDeleteEvento,onMarcarRealizado,onClose}){
+  const evs=getEvForDate(eventos,diaYMD);
+  const d=fromYMD(diaYMD);
+  return(
+    <div className="painel fade-in">
+      <div className="painel-header">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+          <div>
+            <div style={{fontSize:10,color:'var(--t2)',fontWeight:600,textTransform:'uppercase',letterSpacing:'.5px'}}>{DIAS_F[d.getDay()]}</div>
+            <div style={{fontFamily:'Syne',fontWeight:700,fontSize:15}}>{d.getDate()} de {MESES[d.getMonth()]}</div>
+          </div>
+          <button className="btn-icon" onClick={onClose}><Ic.X s={16}/></button>
+        </div>
+        <button className="btn btn-primary btn-sm" style={{width:'100%',justifyContent:'center'}} onClick={()=>onNovoEvento(diaYMD)}>
+          <Ic.Plus s={14}/> Adicionar evento
+        </button>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'12px'}}>
+        {evs.length===0?(
+          <div className="empty-state"><div style={{fontSize:32,marginBottom:8}}>📭</div><div style={{fontSize:13}}>Nenhum evento</div></div>
+        ):evs.map(ev=>{
+          const cat=catEv(ev.categoria);
+          return(
+            <div key={ev.id} className="ev-card" style={{borderLeftColor:ev.cor,opacity:ev.realizado?.7:1}}>
+              <div style={{fontSize:10,color:ev.cor,fontWeight:600,fontVariantNumeric:'tabular-nums'}}>{ev.horaInicio} — {ev.horaFim}</div>
+              <div style={{fontWeight:600,fontSize:13,margin:'2px 0',textDecoration:ev.realizado?'line-through':''}}>{ev.titulo}</div>
+              <div style={{display:'flex',alignItems:'center',gap:6,marginTop:4}}>
+                <span style={{fontSize:11}}>{cat.icon}</span>
+                <span style={{fontSize:11,color:'var(--t2)'}}>{cat.label}</span>
+                {ev.prioridade==='alta'&&<span style={{fontSize:10,color:'var(--red)',marginLeft:'auto'}}>🔴</span>}
+              </div>
+              {ev.participantes&&<div style={{fontSize:11,color:'var(--t2)',marginTop:4}}>👥 {ev.participantes}</div>}
+              <div style={{display:'flex',gap:4,marginTop:8}}>
+                <button className="btn btn-xs btn-ghost" onClick={()=>onEditEvento(ev)}><Ic.Edit s={12}/> Editar</button>
+                <button className="btn btn-xs btn-danger" onClick={()=>onDeleteEvento(ev.id)}><Ic.Trash s={12}/></button>
+                <button className="btn btn-xs" style={{marginLeft:'auto',padding:'3px 9px',borderRadius:7,border:`1px solid ${ev.realizado?'rgba(34,197,94,.3)':'var(--border2)'}`,background:ev.realizado?'rgba(34,197,94,.12)':'transparent',color:ev.realizado?'var(--green)':'var(--t2)',fontSize:11}} onClick={()=>onMarcarRealizado(ev.id,!ev.realizado)}>
+                  <Ic.Check s={11}/> {ev.realizado?'Feito':'Marcar'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── ABA AGENDA ─────────── */
+function AgendaTab({eventos,onSaveEvento,onDeleteEvento,gg}){
+  const [vis,setVis]=useState('mes');
+  const [refDate,setRefDate]=useState(today());
+  const [diaAtivo,setDiaAtivo]=useState(toYMD(today()));
+  const [painelAberto,setPainelAberto]=useState(false);
+  const [modalEv,setModalEv]=useState(null);
+  const ano=refDate.getFullYear();const mes=refDate.getMonth();
+
+  const nav=(delta)=>{
+    const d=new Date(refDate);
+    if(vis==='mes')d.setMonth(d.getMonth()+delta);
+    else if(vis==='semana')d.setDate(d.getDate()+delta*7);
+    else d.setDate(d.getDate()+delta);
+    setRefDate(d);
+  };
+  const openDia=(ymd)=>{setDiaAtivo(ymd);setPainelAberto(true);};
+  const handleSave=(ev)=>{onSaveEvento(ev);setModalEv(null);};
+  const handleDel=(id)=>{if(confirm('Excluir evento?'))onDeleteEvento(id);};
+  const handleMarcar=(id,val)=>{
+    const evs=eventos.map(e=>e.id===id?{...e,realizado:val}:e);
+    onSaveEvento(null,evs);
+  };
+  const fixos=eventos.filter(e=>e.fixo&&e.recorrencia!=='nenhuma');
+  const calTitle=vis==='mes'?`${MESES[mes]} ${ano}`:vis==='semana'?`Semana de ${fmtShort(refDate)}`:fmtDate(refDate);
+
+  return(
+    <div className="fade-in" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div className="cal-header">
+        <div style={{display:'flex',gap:4}}>
+          <button className="btn-icon" onClick={()=>nav(-1)}><Ic.ChevL/></button>
+          <button className="btn-icon" onClick={()=>nav(1)}><Ic.ChevR/></button>
+        </div>
+        <div className="cal-title">{calTitle}</div>
+        <button className="btn btn-ghost btn-sm" onClick={()=>{setRefDate(today());setDiaAtivo(toYMD(today()));setPainelAberto(true);}}>Hoje</button>
+        <div className="view-btns">
+          {[['mes','Mês'],['semana','Semana'],['dia','Dia']].map(([v,l])=>(
+            <div key={v} className={`view-btn ${vis===v?'active':''}`} onClick={()=>setVis(v)}>{l}</div>
+          ))}
+        </div>
+        {gg&&(
+          gg.connected?(
+            <button className="btn btn-ghost btn-sm" onClick={gg.sync} disabled={gg.syncing}
+              style={{gap:5,color:'#4285F4',borderColor:'rgba(66,133,244,.25)',background:'rgba(66,133,244,.07)',flexShrink:0}}>
+              <Ic.Refresh s={13} c='#4285F4' spin={gg.syncing}/>
+              <span className="gg-btn-label">{gg.syncing?'Sincronizando...':'Google Agenda'}</span>
+            </button>
+          ):(
+            <button className="btn btn-ghost btn-sm" onClick={gg.connect}
+              style={{gap:5,color:'#4285F4',borderColor:'rgba(66,133,244,.25)',background:'rgba(66,133,244,.07)',flexShrink:0}}>
+              <Ic.Google s={14}/>
+              <span className="gg-btn-label">Conectar Google Agenda</span>
+            </button>
+          )
+        )}
+        <button className="btn btn-primary btn-sm" onClick={()=>setModalEv({ev:null,data:toYMD(today())})}>
+          <Ic.Plus s={14}/> Novo Evento
+        </button>
+      </div>
+      <div style={{flex:1,display:'flex',overflow:'hidden'}}>
+        <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+          {vis==='mes'&&<CalMensal ano={ano} mes={mes} eventos={eventos} diaAtivo={diaAtivo} onDiaClick={openDia}/>}
+          {vis==='semana'&&<CalSemanal dataRef={refDate} eventos={eventos} onEventoClick={ev=>setModalEv({ev,data:ev.dataInicio})}/>}
+          {vis==='dia'&&<CalDiario data={refDate} eventos={eventos} onEventoClick={ev=>setModalEv({ev,data:ev.dataInicio})}/>}
+          {fixos.length>0&&(
+            <div style={{padding:'12px 20px',borderTop:'1px solid var(--border)',flexShrink:0}}>
+              <div className="section-title" style={{marginBottom:8}}>Eventos Fixos</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                {fixos.map(ev=>{
+                  const cat=catEv(ev.categoria);
+                  return(
+                    <div key={ev.id} style={{display:'flex',alignItems:'center',gap:8,padding:'7px 12px',background:hex2rgba(ev.cor,0.1),border:`1px solid ${hex2rgba(ev.cor,0.25)}`,borderRadius:10,cursor:'pointer'}} onClick={()=>setModalEv({ev,data:ev.dataInicio})}>
+                      <div style={{width:8,height:8,borderRadius:'50%',background:ev.cor}}/>
+                      <span style={{fontSize:12,fontWeight:500}}>{ev.titulo}</span>
+                      <span style={{fontSize:11,color:'var(--t2)'}}>{ev.horaInicio}</span>
+                      <Ic.Edit s={12} c='var(--t3)'/>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+        {painelAberto&&(
+          <PainelDia diaYMD={diaAtivo} eventos={eventos}
+            onNovoEvento={(data)=>setModalEv({ev:null,data})}
+            onEditEvento={(ev)=>setModalEv({ev,data:ev.dataInicio})}
+            onDeleteEvento={handleDel} onMarcarRealizado={handleMarcar}
+            onClose={()=>setPainelAberto(false)}/>
+        )}
+      </div>
+      {modalEv&&<EventoModal evento={modalEv.ev} dataDefault={modalEv.data} onSave={handleSave} onClose={()=>setModalEv(null)}/>}
+    </div>
+  );
+}
+
+/* ─────────── TIMELINE COMPARTILHADA ─────────── */
+function TimelineView({data,blocos,eventos,readOnly,onAddBloco,onToggle,onEdit,onDelete,onTogglePin}){
+  const ymd=toYMD(data);
+  const isToday=ymd===toYMD(today());
+  const [nowMins,setNowMins]=useState(toMins(nowTime()));
+  const lineRef=useRef(null);
+  useEffect(()=>{const iv=setInterval(()=>setNowMins(toMins(nowTime())),60000);return()=>clearInterval(iv);},[]);
+  useEffect(()=>{if(isToday&&lineRef.current)lineRef.current.scrollIntoView({block:'center'});},[isToday]);
+
+  const agEvs=getEvForDate(eventos,ymd);
+  const START=5*60;const END=23*60;
+  const slots=[];for(let m=START;m<END;m+=30)slots.push(m);
+
+  const getBlocos=(s)=>blocos.filter(b=>toMins(b.horaInicio)>=s&&toMins(b.horaInicio)<s+30);
+  const getAg=(s)=>agEvs.filter(ev=>toMins(ev.horaInicio)>=s&&toMins(ev.horaInicio)<s+30);
+  const isOcupado=(s)=>[...blocos,...agEvs].some(b=>s>=toMins(b.horaInicio)&&s<toMins(b.horaFim));
+
+  return(
+    <div className="tl-wrap">
+      {slots.map((slotMins)=>{
+        const bls=getBlocos(slotMins);const agBls=getAg(slotMins);
+        const occupied=isOcupado(slotMins);
+        const showTime=slotMins%60===0;
+        const showLine=isToday&&Math.abs(nowMins-slotMins)<30;
+        const lineOff=isToday?Math.max(0,Math.min(1,(nowMins-slotMins)/30)):null;
+        return(
+          <div key={slotMins} className="tl-row">
+            <div className="tl-time" style={{opacity:showTime?1:0}}>{toHM(slotMins)}</div>
+            <div className="tl-rail"/>
+            <div className="tl-col" style={{position:'relative'}}>
+              {showLine&&(
+                <div ref={lineRef} style={{position:'absolute',left:0,right:0,top:`${lineOff*100}%`,height:2,background:'var(--red)',zIndex:5,pointerEvents:'none'}}>
+                  <div style={{width:8,height:8,background:'var(--red)',borderRadius:'50%',position:'absolute',left:-4,top:-3,animation:'pulseDot 1.5s infinite'}}/>
+                </div>
+              )}
+              {agBls.map(ev=>(
+                <div key={ev.id} className="tl-agenda-block" style={{background:hex2rgba(ev.cor,0.1),borderLeft:`3px solid ${ev.cor}`}}>
+                  <div style={{display:'flex',alignItems:'center',gap:8}}>
+                    <Ic.Calendar s={11} c={ev.cor}/>
+                    <span style={{fontSize:10,color:ev.cor,fontWeight:600}}>{ev.horaInicio}–{ev.horaFim}</span>
+                    <span style={{fontSize:12,fontWeight:600}}>{ev.titulo}</span>
+                    <span style={{fontSize:9,color:'var(--t3)',marginLeft:'auto'}}>Agenda</span>
+                  </div>
+                </div>
+              ))}
+              {bls.map(b=>{
+                const cat=catRot(b.categoria);
+                const passado=isToday&&toMins(b.horaFim)<nowMins;
+                const emAnd=isToday&&toMins(b.horaInicio)<=nowMins&&toMins(b.horaFim)>nowMins;
+                return(
+                  <div key={b.id} className={`tl-block ${b.concluido?'done':''} ${passado&&!b.concluido?'late':''} ${emAnd&&!b.concluido?'current':''}`}
+                    style={{background:hex2rgba(b.cor,0.13),borderLeft:`3px solid ${b.cor}`}}>
+                    <div style={{display:'flex',alignItems:'center',gap:7}}>
+                      <span style={{fontSize:14}}>{cat.icon}</span>
+                      <div style={{flex:1}}>
+                        <div style={{display:'flex',alignItems:'center',gap:6}}>
+                          <span style={{fontSize:12,fontWeight:600}}>{b.titulo}</span>
+                          {b.fixo&&<span className="tl-pin-badge"><Ic.Pin s={9} c='var(--amber)'/> Fixo</span>}
+                          {emAnd&&!b.concluido&&<span style={{fontSize:9,color:'var(--accent)',fontWeight:600,animation:'blink 1.5s infinite'}}>● AGORA</span>}
+                        </div>
+                        <span style={{fontSize:10,color:'var(--t3)',fontVariantNumeric:'tabular-nums'}}>{b.horaInicio}–{b.horaFim}</span>
+                        {b.observacao&&<div style={{fontSize:10,color:'var(--t2)',marginTop:1}}>{b.observacao}</div>}
+                      </div>
+                      {!readOnly&&(
+                        <div style={{display:'flex',gap:3,flexShrink:0}}>
+                          {!b.concluido?<button className="btn-icon" style={{width:26,height:26}} title="Concluir" onClick={()=>onToggle(b.id,true)}><Ic.Check s={13} c='var(--green)'/></button>
+                            :<button className="btn-icon" style={{width:26,height:26}} title="Desfazer" onClick={()=>onToggle(b.id,false)}><Ic.Undo s={13} c='var(--t2)'/></button>}
+                          <button className="btn-icon" style={{width:26,height:26}} title={b.fixo?'Desafixar':'Fixar'} onClick={()=>onTogglePin(b)}>
+                            {b.fixo?<Ic.Unpin s={13} c='var(--amber)'/>:<Ic.Pin s={13} c='var(--t3)'/>}
+                          </button>
+                          <button className="btn-icon" style={{width:26,height:26}} onClick={()=>onEdit(b)}><Ic.Edit s={12}/></button>
+                          <button className="btn-icon" style={{width:26,height:26}} onClick={()=>onDelete(b.id)}><Ic.Trash s={12}/></button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {!occupied&&bls.length===0&&agBls.length===0&&showTime&&!readOnly&&(
+                <div className="tl-slot-empty" onClick={()=>onAddBloco(toHM(slotMins))}>
+                  <Ic.Plus s={13}/><span>Adicionar bloco</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────── RESUMO DIA ─────────── */
+function ResumoDia({blocos,agEvs}){
+  const todos=[...blocos,...agEvs];
+  const totalMins=todos.reduce((a,b)=>a+(toMins(b.horaFim)-toMins(b.horaInicio)),0);
+  const conclMins=blocos.filter(b=>b.concluido).reduce((a,b)=>a+(toMins(b.horaFim)-toMins(b.horaInicio)),0);
+  const pct=totalMins>0?Math.round((conclMins/totalMins)*100):0;
+  const byCat={};
+  blocos.forEach(b=>{if(!byCat[b.categoria])byCat[b.categoria]=0;byCat[b.categoria]+=toMins(b.horaFim)-toMins(b.horaInicio);});
+  const h=Math.floor(totalMins/60);const m=totalMins%60;
+  return(
+    <div style={{marginBottom:14}}>
+      <div style={{display:'flex',gap:10,marginBottom:12}}>
+        <div style={{flex:1,background:'var(--surf2)',borderRadius:11,padding:'11px 13px',border:'1px solid var(--border)'}}>
+          <div style={{fontSize:10,color:'var(--t2)',marginBottom:2}}>Total planejado</div>
+          <div style={{fontFamily:'Syne',fontWeight:800,fontSize:18}}>{h}h {m}min</div>
+        </div>
+        <div style={{flex:1,background:'var(--surf2)',borderRadius:11,padding:'11px 13px',border:'1px solid var(--border)'}}>
+          <div style={{fontSize:10,color:'var(--t2)',marginBottom:2}}>Concluído</div>
+          <div style={{fontFamily:'Syne',fontWeight:800,fontSize:18,color:'var(--green)'}}>{pct}%</div>
+          <div className="progress-bar" style={{marginTop:5}}>
+            <div className="progress-fill" style={{width:`${pct}%`,background:'var(--green)'}}/>
+          </div>
+        </div>
+      </div>
+      {Object.keys(byCat).length>0&&(
+        <>
+          <div className="section-title">Por categoria</div>
+          {Object.entries(byCat).slice(0,4).map(([cid,mins])=>{
+            const cat=catRot(cid);const pctC=totalMins>0?Math.round((mins/totalMins)*100):0;
+            return(
+              <div key={cid} className="summary-bar-row">
+                <div className="summary-bar-label">{cat.icon} {cat.label}</div>
+                <div className="summary-bar-track"><div className="summary-bar-fill" style={{width:`${pctC}%`,background:cat.cor}}/></div>
+                <div className="summary-bar-val">{Math.floor(mins/60)}h{mins%60>0?`${mins%60}m`:''}</div>
+              </div>
+            );
+          })}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─────────── ABA PLANEJAR ─────────── */
+function PlanejaDiaTab({eventos,planos,pinnedBlocos,onSavePlano,onSavePinned}){
+  const amanha=tomorrow();const ymdAmanha=toYMD(amanha);
+  const [planDate,setPlanDate]=useState(ymdAmanha);
+  const plano=planos[planDate]||{blocos:[],notas:''};
+  const [notas,setNotas]=useState(plano.notas||'');
+  const [blocos,setBlocos]=useState([]);
+  const [modalBloco,setModalBloco]=useState(null);
+  const [saved,setSaved]=useState(false);
+
+  useEffect(()=>{
+    const p=planos[planDate]||{blocos:[],notas:''};
+    // merge pinned blocks if not already in plan
+    const pinMerged=[...pinnedBlocos].filter(pb=>!p.blocos.some(b=>b.id===pb.id));
+    setBlocos([...p.blocos,...pinMerged.map(pb=>({...pb,id:uid(),fixo:true}))]);
+    setNotas(p.notas||'');setSaved(false);
+  },[planDate,planos,pinnedBlocos]);
+
+  const agEvs=getEvForDate(eventos,planDate);
+  const planDateObj=fromYMD(planDate);
+  const temPlano=!!planos[planDate];
+  const fixosBlocos=blocos.filter(b=>b.fixo);
+
+  const handleAddBloco=(hora)=>setModalBloco({bloco:null,hora});
+  const handleEditBloco=(b)=>setModalBloco({bloco:b,hora:b.horaInicio});
+  const handleSaveBloco=(b)=>{
+    const novos=blocos.some(x=>x.id===b.id)?blocos.map(x=>x.id===b.id?b:x):[...blocos,b];
+    setBlocos(novos);
+    if(b.fixo){
+      // add/update in global pinned
+      const pins=pinnedBlocos.some(p=>p.id===b.id)?pinnedBlocos.map(p=>p.id===b.id?b:p):[...pinnedBlocos,b];
+      onSavePinned(pins);
+    }
+    setModalBloco(null);setSaved(false);
+  };
+  const handleDeleteBloco=(id)=>{setBlocos(p=>p.filter(b=>b.id!==id));setSaved(false);};
+  const handleToggle=(id,val)=>{setBlocos(p=>p.map(b=>b.id===id?{...b,concluido:val,concluidoEm:val?new Date().toISOString():null}:b));setSaved(false);};
+  const handleTogglePin=(bloco)=>{
+    if(bloco.fixo){
+      // unpin
+      const novos=blocos.map(b=>b.id===bloco.id?{...b,fixo:false}:b);
+      setBlocos(novos);
+      onSavePinned(pinnedBlocos.filter(p=>p.id!==bloco.id));
+    } else {
+      // pin
+      const novo={...bloco,fixo:true};
+      const novos=blocos.map(b=>b.id===bloco.id?novo:b);
+      setBlocos(novos);
+      onSavePinned([...pinnedBlocos,novo]);
+    }
+    setSaved(false);
+  };
+
+  const handleSave=()=>{
+    const now=new Date().toISOString();
+    const total=blocos.length+agEvs.length;const conc=blocos.filter(b=>b.concluido).length;
+    onSavePlano(planDate,{data:planDate,blocos,notas,criadoEm:plano.criadoEm||now,atualizadoEm:now,resumo:{totalBlocos:total,concluidos:conc,percentual:total>0?Math.round((conc/total)*100):0}});
+    setSaved(true);setTimeout(()=>setSaved(false),3000);
+  };
+  const navDate=(d)=>{const dt=fromYMD(planDate);dt.setDate(dt.getDate()+d);setPlanDate(toYMD(dt));};
+
+  return(
+    <div className="fade-in" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div style={{padding:'14px 22px',borderBottom:'1px solid var(--border)',flexShrink:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+          <div>
+            <div style={{fontSize:10,color:'var(--t2)',fontWeight:600,textTransform:'uppercase',letterSpacing:'.5px',marginBottom:2}}>Planejando</div>
+            <div style={{fontFamily:'Syne',fontWeight:700,fontSize:18}}>{fmtDate(planDateObj)}</div>
+          </div>
+          {temPlano&&<span className="badge badge-blue"><Ic.Edit s={10}/> Editando plano</span>}
+          <div style={{marginLeft:'auto',display:'flex',gap:6,alignItems:'center'}}>
+            <button className="btn btn-ghost btn-sm" onClick={()=>navDate(-1)}><Ic.ChevL s={14}/></button>
+            <button className="btn btn-ghost btn-sm" onClick={()=>setPlanDate(ymdAmanha)}>Amanhã</button>
+            <button className="btn btn-ghost btn-sm" onClick={()=>navDate(1)}><Ic.ChevR s={14}/></button>
+            <input type="date" value={planDate} onChange={e=>setPlanDate(e.target.value)} style={{width:145,fontSize:12,padding:'5px 10px'}}/>
+          </div>
+        </div>
+      </div>
+      <div style={{flex:1,overflow:'hidden',display:'flex'}}>
+        {/* Timeline */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',padding:'14px 16px 14px 22px'}}>
+          {/* Pinned fixos banner */}
+          {fixosBlocos.length>0&&(
+            <div className="pinned-section">
+              <div className="pinned-header"><Ic.Pin s={13} c='var(--amber)'/> Atividades fixas no plano ({fixosBlocos.length})</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                {fixosBlocos.map(b=>{
+                  const cat=catRot(b.categoria);
+                  return(
+                    <div key={b.id} style={{display:'flex',alignItems:'center',gap:6,padding:'5px 10px',background:hex2rgba(b.cor,0.15),borderRadius:8,border:`1px solid ${hex2rgba(b.cor,0.25)}`}}>
+                      <span style={{fontSize:12}}>{cat.icon}</span>
+                      <span style={{fontSize:11,fontWeight:500}}>{b.titulo}</span>
+                      <span style={{fontSize:10,color:'var(--t3)'}}>{b.horaInicio}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {/* Agenda card */}
+          {agEvs.length>0?(
+            <div style={{marginBottom:12,background:'rgba(34,197,94,.05)',border:'1px solid rgba(34,197,94,.18)',borderRadius:12,padding:'11px 14px',flexShrink:0}}>
+              <div style={{fontSize:11,fontWeight:600,color:'var(--accent)',marginBottom:7,display:'flex',alignItems:'center',gap:5}}><Ic.Calendar s={12} c='var(--accent)'/> Já agendado ({agEvs.length})</div>
+              {agEvs.map(ev=>(
+                <div key={ev.id} style={{display:'flex',alignItems:'center',gap:8,marginBottom:3}}>
+                  <div style={{width:3,height:18,borderRadius:99,background:ev.cor,flexShrink:0}}/>
+                  <span style={{fontSize:10,color:'var(--t3)',width:76,fontVariantNumeric:'tabular-nums'}}>{ev.horaInicio}–{ev.horaFim}</span>
+                  <span style={{fontSize:12,fontWeight:500}}>{ev.titulo}</span>
+                </div>
+              ))}
+            </div>
+          ):(
+            <div style={{marginBottom:12,padding:'8px 14px',background:'rgba(34,197,94,.05)',border:'1px solid rgba(34,197,94,.15)',borderRadius:10,fontSize:12,color:'var(--green)',flexShrink:0,display:'flex',alignItems:'center',gap:6}}>
+              <Ic.Check s={13}/> Nenhum compromisso agendado
+            </div>
+          )}
+          <TimelineView data={planDateObj} blocos={blocos} eventos={eventos}
+            onAddBloco={handleAddBloco} onEdit={handleEditBloco} onDelete={handleDeleteBloco}
+            onToggle={handleToggle} onTogglePin={handleTogglePin}/>
+        </div>
+        {/* Side */}
+        <div style={{width:270,flexShrink:0,borderLeft:'1px solid var(--border)',padding:'16px 18px',overflowY:'auto',display:'flex',flexDirection:'column',gap:14}}>
+          <ResumoDia blocos={blocos} agEvs={agEvs}/>
+          <div>
+            <div className="section-title">Intenção do dia</div>
+            <textarea rows={5} value={notas} onChange={e=>{setNotas(e.target.value);setSaved(false);}} placeholder="Metas, pensamentos, lembretes..."/>
+          </div>
+          <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'10px'}} onClick={handleSave}>
+            {saved?<><Ic.Check s={14}/>Salvo!</>:<><Ic.Check s={14}/>Salvar Plano</>}
+          </button>
+        </div>
+      </div>
+      {modalBloco&&<BlocoModal bloco={modalBloco.bloco} data={planDate} horaDefault={modalBloco.hora} onSave={handleSaveBloco} onClose={()=>setModalBloco(null)}/>}
+    </div>
+  );
+}
+
+/* ─────────── COUNTDOWN ─────────── */
+function Countdown({targetTime}){
+  const [diff,setDiff]=useState(0);
+  useEffect(()=>{
+    const calc=()=>{const now=new Date();const[h,m]=targetTime.split(':').map(Number);const t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m);setDiff(Math.max(0,Math.floor((t-now)/1000)));};
+    calc();const iv=setInterval(calc,1000);return()=>clearInterval(iv);
+  },[targetTime]);
+  if(diff===0)return<span style={{color:'var(--green)'}}>Agora!</span>;
+  const h=Math.floor(diff/3600);const m=Math.floor((diff%3600)/60);const s=diff%60;
+  return<span>{h>0&&`${h}h `}{m>0&&`${m}min `}{h===0&&`${String(s).padStart(2,'0')}s`}</span>;
+}
+
+/* ─────────── ABA MEU DIA ─────────── */
+function MeuDiaTab({eventos,planos,pinnedBlocos,onSavePlano,onGoPlanejar}){
+  const todayYMD=toYMD(today());
+  const plano=planos[todayYMD]||{blocos:[],notas:''};
+  const [blocos,setBlocos]=useState([]);
+  const [clock,setClock]=useState(nowTime());
+  const hora=parseInt(clock.split(':')[0]);
+
+  useEffect(()=>{
+    const p=planos[todayYMD]||{blocos:[]};
+    const pinMerged=pinnedBlocos.filter(pb=>!p.blocos.some(b=>b.id===pb.id));
+    setBlocos([...p.blocos,...pinMerged.map(pb=>({...pb,id:uid(),fixo:true}))]);
+  },[planos,todayYMD,pinnedBlocos]);
+
+  useEffect(()=>{const iv=setInterval(()=>setClock(nowTime()),60000);return()=>clearInterval(iv);},[]);
+
+  const agEvs=getEvForDate(eventos,todayYMD);
+  const total=blocos.length+agEvs.length;
+  const concl=blocos.filter(b=>b.concluido).length;
+  const pct=total>0?Math.round((concl/total)*100):0;
+  const nm=toMins(clock);
+  const proxEvento=[...agEvs,...blocos].filter(e=>toMins(e.horaInicio)>nm).sort((a,b)=>toMins(a.horaInicio)-toMins(b.horaInicio))[0];
+  const status=pct>=80?'green':pct>=50?'amber':'red';
+  const statusLabel=pct>=80?'No ritmo':pct>=50?'Atenção':'Atrasado';
+
+  const handleToggle=(id,val)=>{
+    const novos=blocos.map(b=>b.id===id?{...b,concluido:val,concluidoEm:val?new Date().toISOString():null}:b);
+    setBlocos(novos);
+    const now=new Date().toISOString();
+    onSavePlano(todayYMD,{...plano,blocos:novos,atualizadoEm:now});
+  };
+  const temPlano=blocos.length>0||agEvs.length>0;
+
+  return(
+    <div className="fade-in" style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div style={{padding:'14px 22px',borderBottom:'1px solid var(--border)',flexShrink:0,background:'var(--surface)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
+          <div>
+            <div style={{fontSize:10,color:'var(--t2)',fontWeight:600,textTransform:'uppercase',letterSpacing:'.5px'}}>Hoje</div>
+            <div style={{fontFamily:'Syne',fontWeight:700,fontSize:17}}>{fmtDate(today())}</div>
+          </div>
+          <div style={{fontFamily:'Syne',fontWeight:800,fontSize:26,color:'var(--accent)',fontVariantNumeric:'tabular-nums'}}>{clock}</div>
+          <span className={`badge badge-${status}`}>
+            {status==='green'?<Ic.Check s={10}/>:status==='amber'?<Ic.Bell s={10}/>:null}
+            {statusLabel}
+          </span>
+          <div style={{marginLeft:'auto',flex:1,maxWidth:220}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--t2)',marginBottom:3}}>
+              <span>{concl}/{total} concluídos</span>
+              <span style={{fontWeight:700,color:status==='green'?'var(--green)':status==='amber'?'var(--amber)':'var(--red)'}}>{pct}%</span>
+            </div>
+            <div className="progress-bar"><div className="progress-fill" style={{width:`${pct}%`,background:status==='green'?'var(--green)':status==='amber'?'var(--amber)':'var(--red)'}}/></div>
+          </div>
+        </div>
+      </div>
+      {!temPlano?(
+        <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:14,padding:40}}>
+          <Ic.Plan s={48} c='var(--t3)'/>
+          <div style={{fontFamily:'Syne',fontWeight:700,fontSize:20,textAlign:'center'}}>Sem plano para hoje</div>
+          <div style={{color:'var(--t2)',textAlign:'center',maxWidth:320,fontSize:13}}>Monte sua rotina na aba "Planejar Dia".</div>
+          <button className="btn btn-primary" onClick={onGoPlanejar}><Ic.Plan s={14}/> Planejar agora</button>
+        </div>
+      ):(
+        <div style={{flex:1,overflow:'hidden',display:'flex'}}>
+          <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',padding:'14px 16px 14px 22px'}}>
+            {proxEvento&&(
+              <div className="next-card" style={{marginBottom:14,flexShrink:0}}>
+                <div style={{fontSize:10,color:'var(--accent)',fontWeight:600,marginBottom:5,display:'flex',alignItems:'center',gap:5}}><Ic.Today s={11}/> Próximo compromisso</div>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontFamily:'Syne',fontWeight:700,fontSize:15}}>{proxEvento.titulo}</div>
+                    <div style={{fontSize:11,color:'var(--t2)',marginTop:2}}>{proxEvento.horaInicio}</div>
+                  </div>
+                  <div style={{textAlign:'right'}}>
+                    <div style={{fontSize:10,color:'var(--t2)'}}>em</div>
+                    <div className="countdown-num"><Countdown targetTime={proxEvento.horaInicio}/></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <TimelineView data={today()} blocos={blocos} eventos={eventos}
+              onToggle={handleToggle} onAddBloco={()=>{}} onEdit={()=>{}} onDelete={()=>{}} onTogglePin={()=>{}} readOnly={false}/>
+          </div>
+          <div style={{width:250,flexShrink:0,borderLeft:'1px solid var(--border)',padding:'16px 18px',overflowY:'auto',display:'flex',flexDirection:'column',gap:14}}>
+            <div className="stat-grid">
+              <div className="stat-card"><div className="stat-num" style={{color:'var(--accent)'}}>{total}</div><div className="stat-label">Total</div></div>
+              <div className="stat-card"><div className="stat-num" style={{color:'var(--green)'}}>{concl}</div><div className="stat-label">Feitos</div></div>
+              <div className="stat-card"><div className="stat-num" style={{color:'var(--amber)'}}>{total-concl}</div><div className="stat-label">Abertos</div></div>
+            </div>
+            <ResumoDia blocos={blocos} agEvs={agEvs}/>
+            {plano.notas&&(
+              <div>
+                <div className="section-title">Intenção do dia</div>
+                <div style={{fontSize:12,color:'var(--t2)',lineHeight:1.6,background:'var(--surf2)',borderRadius:10,padding:'10px 12px'}}>{plano.notas}</div>
+              </div>
+            )}
+            {hora>=20&&(
+              <div style={{background:'rgba(34,197,94,.07)',border:'1px solid rgba(34,197,94,.2)',borderRadius:12,padding:'13px 15px'}}>
+                <div style={{fontWeight:600,fontSize:13,marginBottom:5,display:'flex',alignItems:'center',gap:6}}><Ic.Moon s={13} c='var(--accent)'/> Lembrete noturno</div>
+                <div style={{fontSize:12,color:'var(--t2)',marginBottom:10}}>Planejou o amanhã?</div>
+                <button className="btn btn-accent2 btn-sm" style={{width:'100%',justifyContent:'center'}} onClick={onGoPlanejar}>Planejar amanhã →</button>
+              </div>
+            )}
+            {hora>=21&&(
+              <div style={{background:'rgba(34,197,94,.06)',border:'1px solid rgba(34,197,94,.18)',borderRadius:12,padding:'13px 15px'}}>
+                <div style={{fontWeight:600,fontSize:13,marginBottom:3}}>Como foi seu dia?</div>
+                <div style={{fontFamily:'Syne',fontWeight:800,fontSize:26,color:'var(--green)'}}>{pct}%</div>
+                <div style={{fontSize:11,color:'var(--t2)'}}>de conclusão</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────── DASHBOARD ─────────── */
+
+// SVG Donut Chart
+function DonutChart({data,size=160}){
+  const total=data.reduce((s,d)=>s+d.value,0);
+  if(total===0)return(
+    <div style={{width:size,height:size,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',color:'var(--t3)'}}>
+      <Ic.Target s={32} c='var(--t3)'/>
+      <div style={{fontSize:11,marginTop:6}}>Sem dados</div>
+    </div>
+  );
+  const cx=size/2,cy=size/2,r=size/2-16,ir=r*0.56;
+  const toXY=(angle)=>{const rad=angle*Math.PI/180;return {x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};};
+  const toXYi=(angle)=>{const rad=angle*Math.PI/180;return {x:cx+ir*Math.cos(rad),y:cy+ir*Math.sin(rad)};};
+  let cur=-90;
+  const segs=data.filter(d=>d.value>0).map(d=>{
+    const ang=(d.value/total)*360;
+    const seg={...d,s:cur,e:cur+ang};cur+=ang;return seg;
+  });
+  const arc=(s,e)=>{
+    const p1=toXY(s),p2=toXY(e),p3=toXYi(e),p4=toXYi(s);
+    const lg=e-s>180?1:0;
+    return `M${p1.x},${p1.y} A${r},${r} 0 ${lg} 1 ${p2.x},${p2.y} L${p3.x},${p3.y} A${ir},${ir} 0 ${lg} 0 ${p4.x},${p4.y} Z`;
+  };
+  const hTotal=Math.floor(total/60),mTotal=total%60;
+  return(
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {segs.map((seg,i)=>(
+        <path key={i} d={arc(seg.s,seg.e)} fill={seg.color} opacity={.88}/>
+      ))}
+      <text x={cx} y={cy-7} textAnchor="middle" fill="#F0FFF4" fontSize="18" fontWeight="800" fontFamily="Syne,sans-serif">
+        {hTotal>0?`${hTotal}h`:''}{mTotal>0&&hTotal===0?`${mTotal}m`:''}
+      </text>
+      <text x={cx} y={cy+10} textAnchor="middle" fill="#7A9A82" fontSize="9">planejadas</text>
+    </svg>
+  );
+}
+
+// SVG Bar Chart
+function BarChart({data,height=120,accent='#22C55E'}){
+  if(!data||data.length===0)return<div style={{height,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--t3)',fontSize:12}}>Sem dados</div>;
+  const max=Math.max(...data.map(d=>d.value),1);
+  const bw=Math.max(16,Math.floor(280/data.length)-6);
+  const gap=Math.max(4,Math.floor(50/data.length));
+  const totalW=data.length*(bw+gap);
+  return(
+    <svg width="100%" height={height} viewBox={`0 0 ${totalW} ${height}`} preserveAspectRatio="xMidYMid meet" style={{display:'block'}}>
+      {data.map((d,i)=>{
+        const barH=Math.max(2,(d.value/max)*(height-28));
+        const x=i*(bw+gap);const y=height-20-barH;
+        const col=d.color||accent;
+        return(
+          <g key={i}>
+            <rect x={x} y={y} width={bw} height={barH} rx={4} fill={col} opacity={.85}/>
+            {d.value>0&&<text x={x+bw/2} y={y-3} textAnchor="middle" fill={col} fontSize="8" fontWeight="600">{d.value>=60?`${Math.floor(d.value/60)}h`:`${d.value}m`}</text>}
+            <text x={x+bw/2} y={height-5} textAnchor="middle" fill="#3A5240" fontSize="8">{d.label}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+// Mini line sparkline
+function Sparkline({data,width=120,height=36,color='#22C55E'}){
+  if(!data||data.length<2)return null;
+  const max=Math.max(...data,1);
+  const pts=data.map((v,i)=>{
+    const x=(i/(data.length-1))*(width-4)+2;
+    const y=height-2-(v/max)*(height-6);
+    return `${x},${y}`;
+  }).join(' ');
+  return(
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points={`2,${height} ${pts} ${width-2},${height}`} fill={color} opacity=".12" strokeWidth="0"/>
+    </svg>
+  );
+}
+
+// Data helpers for dashboard
+function getDashData(planos,eventos,period){
+  const now=new Date();
+  const todayStr=toYMD(today());
+
+  const filterKey=(k)=>{
+    if(period==='geral')return true;
+    if(period==='dia')return k===todayStr;
+    if(period==='semana'){
+      const start=new Date(today());start.setDate(start.getDate()-start.getDay());
+      const end=addDays(start,6);
+      return k>=toYMD(start)&&k<=toYMD(end);
+    }
+    if(period==='mes'){
+      const ym=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      return k.startsWith(ym);
+    }
+    return true;
+  };
+
+  const keys=Object.keys(planos).filter(filterKey).sort();
+  const allBlocos=keys.flatMap(k=>planos[k].blocos||[]);
+
+  // cat stats
+  const catMap={};
+  allBlocos.forEach(b=>{
+    if(!catMap[b.categoria])catMap[b.categoria]={mins:0,count:0,done:0,cor:b.cor};
+    const m=toMins(b.horaFim)-toMins(b.horaInicio);
+    catMap[b.categoria].mins+=Math.max(0,m);
+    catMap[b.categoria].count++;
+    if(b.concluido)catMap[b.categoria].done++;
+  });
+
+  // activity ranking
+  const actMap={};
+  allBlocos.forEach(b=>{
+    const k=b.titulo.trim().toLowerCase();
+    if(!actMap[k])actMap[k]={titulo:b.titulo,mins:0,count:0,done:0,cor:b.cor};
+    actMap[k].mins+=Math.max(0,toMins(b.horaFim)-toMins(b.horaInicio));
+    actMap[k].count++;
+    if(b.concluido)actMap[k].done++;
+  });
+
+  // daily bars
+  const dailyMap={};
+  keys.forEach(k=>{
+    const bs=planos[k].blocos||[];
+    dailyMap[k]={mins:bs.reduce((s,b)=>s+Math.max(0,toMins(b.horaFim)-toMins(b.horaInicio)),0),done:bs.filter(b=>b.concluido).length,total:bs.length};
+  });
+
+  const totalMins=allBlocos.reduce((s,b)=>s+Math.max(0,toMins(b.horaFim)-toMins(b.horaInicio)),0);
+  const totalDone=allBlocos.filter(b=>b.concluido).length;
+  const diasPlanejados=keys.length;
+  const pct=allBlocos.length>0?Math.round((totalDone/allBlocos.length)*100):0;
+
+  // best day
+  const bestDay=Object.entries(dailyMap).sort((a,b)=>(b[1].total>0?b[1].done/b[1].total:0)-(a[1].total>0?a[1].done/a[1].total:0))[0];
+
+  // agenda events for period
+  const agEvs=[];
+  keys.forEach(k=>{agEvs.push(...getEvForDate(eventos,k));});
+  const agCatMap={};
+  agEvs.forEach(ev=>{
+    if(!agCatMap[ev.categoria])agCatMap[ev.categoria]={mins:0,count:0,cor:ev.cor};
+    agCatMap[ev.categoria].mins+=Math.max(0,toMins(ev.horaFim)-toMins(ev.horaInicio));
+    agCatMap[ev.categoria].count++;
+  });
+
+  return{catMap,actMap,dailyMap,totalMins,totalDone,diasPlanejados,pct,bestDay,agCatMap,allBlocos,keys};
+}
+
+function DashboardTab({planos,eventos}){
+  const [period,setPeriod]=useState('semana');
+  const data=useMemo(()=>getDashData(planos,eventos,period),[planos,eventos,period]);
+
+  const {catMap,actMap,dailyMap,totalMins,totalDone,diasPlanejados,pct,bestDay,agCatMap,allBlocos,keys}=data;
+  const hTotal=Math.floor(totalMins/60),mTotal=totalMins%60;
+
+  // donut data — blocos por categoria
+  const donutData=Object.entries(catMap).map(([id,v])=>{
+    const cat=catRot(id);return{label:cat.label,value:v.mins,color:cat.cor||v.cor,icon:cat.icon};
+  }).sort((a,b)=>b.value-a.value);
+
+  // top activities
+  const topActs=Object.values(actMap).sort((a,b)=>b.mins-a.mins).slice(0,8);
+  const maxActMins=topActs[0]?.mins||1;
+
+  // daily bars
+  const barData=keys.slice(-14).map(k=>{
+    const d=fromYMD(k);
+    const label=period==='geral'||period==='mes'?`${d.getDate()}/${d.getMonth()+1}`:DIAS[d.getDay()];
+    return{label,value:dailyMap[k]?.mins||0,done:dailyMap[k]?.done||0,total:dailyMap[k]?.total||0};
+  });
+
+  // sparkline: daily completion %
+  const sparkData=keys.map(k=>dailyMap[k]?.total>0?Math.round((dailyMap[k].done/dailyMap[k].total)*100):0);
+
+  // agenda donut
+  const agDonut=Object.entries(agCatMap).map(([id,v])=>{
+    const cat=catEv(id);return{label:cat.label,value:v.mins,color:cat.cor||v.cor,icon:cat.icon};
+  }).sort((a,b)=>b.value-a.value);
+  const agTotal=agDonut.reduce((s,d)=>s+d.value,0);
+
+  const periodLabel={geral:'todo o período',mes:'este mês',semana:'esta semana',dia:'hoje'};
+
+  if(allBlocos.length===0&&keys.length===0){
+    return(
+      <div className="dash-wrap" style={{alignItems:'center',justifyContent:'center',flex:1}}>
+        <div style={{textAlign:'center',padding:40}}>
+          <Ic.Dash s={52} c='var(--t3)'/>
+          <div style={{fontFamily:'Syne',fontWeight:700,fontSize:20,marginTop:14,marginBottom:8}}>Nenhum dado ainda</div>
+          <div style={{color:'var(--t2)',fontSize:13,maxWidth:320}}>Comece planejando seu dia na aba "Planejar Dia" para ver as estatísticas aqui.</div>
+        </div>
+      </div>
+    );
+  }
+
+  return(
+    <div className="dash-wrap">
+      {/* Period selector */}
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
+        <div style={{fontFamily:'Syne',fontWeight:700,fontSize:17}}>Dashboard</div>
+        <div className="dash-period" style={{maxWidth:380,flex:1}}>
+          {[['geral','Geral'],['mes','Mês'],['semana','Semana'],['dia','Hoje']].map(([v,l])=>(
+            <div key={v} className={`dash-period-btn ${period===v?'active':''}`} onClick={()=>setPeriod(v)}>{l}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Stat cards */}
+      <div className="dash-grid-4">
+        <div className="dash-card" style={{borderLeft:'3px solid var(--accent)'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+            <Ic.Today s={16} c='var(--accent)'/>
+            <Sparkline data={sparkData} width={60} height={28}/>
+          </div>
+          <div className="dash-stat-num" style={{color:'var(--accent)'}}>{hTotal}h{mTotal>0?` ${mTotal}m`:''}</div>
+          <div className="dash-stat-label">Horas planejadas</div>
+          <div className="dash-stat-sub">{periodLabel[period]}</div>
+        </div>
+        <div className="dash-card" style={{borderLeft:'3px solid var(--green)'}}>
+          <div style={{marginBottom:6}}><Ic.Target s={16} c='var(--green)'/></div>
+          <div className="dash-stat-num" style={{color:'var(--green)'}}>{pct}%</div>
+          <div className="dash-stat-label">Taxa de conclusão</div>
+          <div className="dash-stat-sub">{totalDone} de {allBlocos.length} blocos</div>
+        </div>
+        <div className="dash-card" style={{borderLeft:'3px solid var(--amber)'}}>
+          <div style={{marginBottom:6}}><Ic.Award s={16} c='var(--amber)'/></div>
+          <div className="dash-stat-num" style={{color:'var(--amber)'}}>{diasPlanejados}</div>
+          <div className="dash-stat-label">Dias planejados</div>
+          <div className="dash-stat-sub">{keys[0]||'—'} → {keys[keys.length-1]||'—'}</div>
+        </div>
+        <div className="dash-card" style={{borderLeft:'3px solid var(--cyan)'}}>
+          <div style={{marginBottom:6}}><Ic.TrendUp s={16} c='var(--cyan)'/></div>
+          <div className="dash-stat-num" style={{color:'var(--cyan)'}}>{totalDone}</div>
+          <div className="dash-stat-label">Atividades concluídas</div>
+          <div className="dash-stat-sub">média {diasPlanejados>0?Math.round(totalDone/diasPlanejados):0}/dia</div>
+        </div>
+      </div>
+
+      {/* Donut + Agenda */}
+      <div className="dash-grid-2">
+        {/* Rotina por categoria */}
+        <div className="dash-card">
+          <div className="dash-card-title"><Ic.Plan s={14} c='var(--accent)'/> Tempo de rotina por categoria</div>
+          {donutData.length===0?(
+            <div style={{color:'var(--t3)',fontSize:12,textAlign:'center',padding:20}}>Sem blocos de rotina no período</div>
+          ):(
+            <div className="donut-wrap">
+              <DonutChart data={donutData} size={150}/>
+              <div style={{flex:1,minWidth:120}}>
+                {donutData.slice(0,7).map((d,i)=>{
+                  const pctD=totalMins>0?Math.round((d.value/totalMins)*100):0;
+                  return(
+                    <div key={i} className="legend-row">
+                      <div className="legend-dot" style={{background:d.color}}/>
+                      <div style={{flex:1,fontSize:11,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{d.icon} {d.label}</div>
+                      <div style={{fontSize:11,color:'var(--t2)',fontWeight:600,minWidth:36,textAlign:'right'}}>{Math.floor(d.value/60)}h{d.value%60>0&&!Math.floor(d.value/60)?`${d.value%60}m`:''}</div>
+                      <div style={{fontSize:10,color:'var(--t3)',minWidth:28,textAlign:'right'}}>{pctD}%</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Agenda por categoria */}
+        <div className="dash-card">
+          <div className="dash-card-title"><Ic.Calendar s={14} c='var(--accent)'/> Agenda por categoria</div>
+          {agDonut.length===0?(
+            <div style={{color:'var(--t3)',fontSize:12,textAlign:'center',padding:20}}>Sem eventos no período</div>
+          ):(
+            <div className="donut-wrap">
+              <DonutChart data={agDonut} size={130}/>
+              <div style={{flex:1,minWidth:110}}>
+                {agDonut.slice(0,6).map((d,i)=>{
+                  const pctD=agTotal>0?Math.round((d.value/agTotal)*100):0;
+                  return(
+                    <div key={i} className="legend-row">
+                      <div className="legend-dot" style={{background:d.color}}/>
+                      <div style={{flex:1,fontSize:11,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{d.icon} {d.label}</div>
+                      <div style={{fontSize:11,color:'var(--t2)',fontWeight:600,minWidth:30,textAlign:'right'}}>{pctD}%</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bar chart — horas por dia */}
+      {barData.length>0&&(
+        <div className="dash-card">
+          <div className="dash-card-title"><Ic.TrendUp s={14} c='var(--accent)'/> Horas planejadas por dia</div>
+          <BarChart data={barData} height={130}/>
+        </div>
+      )}
+
+      {/* Top atividades */}
+      {topActs.length>0&&(
+        <div className="dash-grid-2">
+          <div className="dash-card">
+            <div className="dash-card-title"><Ic.Star s={14} c='var(--amber)'/> Top atividades por tempo</div>
+            {topActs.map((a,i)=>(
+              <div key={i} className="hbar-row">
+                <div className="hbar-labels">
+                  <span>{a.titulo}</span>
+                  <span style={{color:'var(--accent)',fontWeight:600}}>{Math.floor(a.mins/60)}h{a.mins%60>0?` ${a.mins%60}m`:''}</span>
+                </div>
+                <div className="hbar-track">
+                  <div className="hbar-fill" style={{width:`${(a.mins/maxActMins)*100}%`,background:a.cor||'var(--accent)'}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="dash-card">
+            <div className="dash-card-title"><Ic.Award s={14} c='var(--amber)'/> Ranking de atividades</div>
+            {topActs.slice(0,6).map((a,i)=>{
+              const actPct=a.count>0?Math.round((a.done/a.count)*100):0;
+              return(
+                <div key={i} className="rank-item">
+                  <div className={`rank-num ${i===0?'first':''}`}>#{i+1}</div>
+                  <div style={{flex:1,overflow:'hidden'}}>
+                    <div style={{fontSize:12,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.titulo}</div>
+                    <div style={{fontSize:10,color:'var(--t2)',marginTop:2}}>{a.count}x realizada · {actPct}% concluída</div>
+                  </div>
+                  <div style={{fontSize:11,color:i===0?'var(--accent)':'var(--t3)',fontWeight:600,flexShrink:0}}>{Math.floor(a.mins/60)}h{a.mins%60>0&&!Math.floor(a.mins/60)?`${a.mins%60}m`:''}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Conclusão por dia - tabela */}
+      {keys.length>0&&(
+        <div className="dash-card">
+          <div className="dash-card-title"><Ic.Check s={14} c='var(--green)'/> Desempenho por dia</div>
+          <div style={{overflowX:'auto'}}>
+            <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
+              <thead>
+                <tr style={{borderBottom:'1px solid var(--border)'}}>
+                  {['Data','Dia','Blocos','Concluídos','%','Horas'].map(h=>(
+                    <th key={h} style={{padding:'6px 10px',textAlign:'left',fontSize:10,fontWeight:600,color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.5px'}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {keys.slice(-10).reverse().map(k=>{
+                  const d=fromYMD(k);
+                  const row=dailyMap[k]||{mins:0,done:0,total:0};
+                  const rowPct=row.total>0?Math.round((row.done/row.total)*100):0;
+                  const isToday=k===toYMD(today());
+                  return(
+                    <tr key={k} style={{borderBottom:'1px solid var(--border)',background:isToday?'rgba(34,197,94,.05)':'transparent'}}>
+                      <td style={{padding:'8px 10px',fontVariantNumeric:'tabular-nums',color:'var(--t2)'}}>{k}</td>
+                      <td style={{padding:'8px 10px',fontWeight:500}}>{DIAS_F[d.getDay()].split('-')[0]}{isToday&&<span style={{fontSize:9,background:'var(--accent)',color:'#000',borderRadius:4,padding:'1px 5px',marginLeft:6,fontWeight:700}}>HOJE</span>}</td>
+                      <td style={{padding:'8px 10px',color:'var(--t2)'}}>{row.total}</td>
+                      <td style={{padding:'8px 10px',color:'var(--green)',fontWeight:600}}>{row.done}</td>
+                      <td style={{padding:'8px 10px'}}>
+                        <div style={{display:'flex',alignItems:'center',gap:8}}>
+                          <div style={{width:50,height:5,background:'var(--surf3)',borderRadius:99,overflow:'hidden'}}>
+                            <div style={{height:'100%',width:`${rowPct}%`,background:rowPct>=80?'var(--green)':rowPct>=50?'var(--amber)':'var(--red)',borderRadius:99}}/>
+                          </div>
+                          <span style={{color:rowPct>=80?'var(--green)':rowPct>=50?'var(--amber)':'var(--red)',fontWeight:600}}>{rowPct}%</span>
+                        </div>
+                      </td>
+                      <td style={{padding:'8px 10px',color:'var(--t2)',fontVariantNumeric:'tabular-nums'}}>{Math.floor(row.mins/60)}h{row.mins%60>0?` ${row.mins%60}m`:''}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────── METAS ─────────── */
+
+const PRIO_META=[
+  {id:'alta',label:'Alta',cor:'#EF4444'},
+  {id:'media',label:'Média',cor:'#F59E0B'},
+  {id:'baixa',label:'Baixa',cor:'#22C55E'},
+];
+
+const CAT_META={
+  pessoal:{label:'Pessoal',cor:'#818CF8',bg:'rgba(129,140,248,.15)',icon:'👤'},
+  trabalho:{label:'Trabalho',cor:'#F59E0B',bg:'rgba(245,158,11,.12)',icon:'💼'},
+};
+
+function MetaItem({meta,onToggle,onDelete,onEdit,onUpdateQtd}){
+  const prio=PRIO_META.find(p=>p.id===meta.prioridade)||PRIO_META[1];
+  const cat=CAT_META[meta.categoria]||CAT_META.pessoal;
+  const isQtd=meta.tipo==='quantidade';
+  const atual=meta.atual||0;
+  const alvo=meta.metaQtd||1;
+  const pctQtd=Math.min(100,Math.round((atual/alvo)*100));
+  const concluida=isQtd?atual>=alvo:meta.concluido;
+
+  return(
+    <div className={`meta-item ${concluida?'done':''}`}>
+      <div className={`meta-check ${concluida?'done':''}`}
+        onClick={()=>!isQtd&&onToggle(meta.id)}
+        style={{cursor:isQtd?'default':'pointer'}}>
+        {concluida&&<Ic.Check s={12} c='#000'/>}
+      </div>
+      <div className="meta-prio-dot" style={{background:prio.cor,opacity:concluida?.4:1}}/>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+          <div className="meta-titulo">{meta.titulo}</div>
+          <span className="meta-cat-badge" style={{color:cat.cor,background:cat.bg}}>{cat.icon} {cat.label}</span>
+          {isQtd&&<span style={{fontSize:10,color:'var(--t3)',background:'var(--surf2)',border:'1px solid var(--border)',borderRadius:5,padding:'1px 6px'}}>#</span>}
+        </div>
+        {meta.descricao&&<div className="meta-desc">{meta.descricao}</div>}
+        {isQtd&&!concluida&&(
+          <>
+            <div className="meta-qtd-bar">
+              <div className="meta-qtd-fill" style={{width:`${pctQtd}%`,background:pctQtd>=100?'var(--accent)':pctQtd>=50?'#F59E0B':prio.cor}}/>
+            </div>
+            <div className="meta-qtd-row">
+              <button className="meta-qtd-btn" disabled={atual<=0} onClick={e=>{e.stopPropagation();onUpdateQtd(meta.id,-1);}}>−</button>
+              <span style={{fontSize:13,fontWeight:700,minWidth:18,textAlign:'center'}}>{atual}</span>
+              <button className="meta-qtd-btn" disabled={concluida} onClick={e=>{e.stopPropagation();onUpdateQtd(meta.id,1);}}>+</button>
+              <span className="meta-qtd-label">{atual} / {alvo}{meta.unidade?' '+meta.unidade:''}</span>
+              <span style={{fontSize:11,fontWeight:700,color:pctQtd>=100?'var(--accent)':pctQtd>=50?'#F59E0B':'var(--t3)'}}>{pctQtd}%</span>
+            </div>
+          </>
+        )}
+        {concluida&&meta.concluidoEm&&(
+          <div style={{fontSize:10,color:'var(--t3)',marginTop:4}}>
+            Concluído {new Date(meta.concluidoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+            {isQtd&&<span style={{marginLeft:4}}>· {alvo}{meta.unidade?' '+meta.unidade:''} atingidos</span>}
+          </div>
+        )}
+      </div>
+      <div className="meta-actions">
+        <button className="btn-icon" style={{width:26,height:26}} onClick={()=>onEdit(meta)} title="Editar"><Ic.Edit s={12}/></button>
+        <button className="btn-icon" style={{width:26,height:26}} onClick={()=>onDelete(meta.id)} title="Excluir"><Ic.Trash s={12}/></button>
+      </div>
+    </div>
+  );
+}
+
+function MetaSection({titulo,cor,icone,periodo,metas,onToggle,onDelete,onEdit,onUpdateQtd}){
+  const minhas=metas.filter(m=>m.periodo===periodo);
+  const isConcluida=m=>m.tipo==='quantidade'?(m.atual||0)>=(m.metaQtd||1):m.concluido;
+  const feitas=minhas.filter(isConcluida).length;
+  const pct=minhas.length>0?Math.round((feitas/minhas.length)*100):0;
+  const pendentes=minhas.filter(m=>!isConcluida(m));
+  const concluidas=minhas.filter(isConcluida);
+  const [showDone,setShowDone]=useState(false);
+
+  return(
+    <div className="meta-section">
+      {/* Header */}
+      <div className="meta-section-header">
+        <div className="meta-section-title" style={{color:cor}}>{icone}<span>{titulo}</span></div>
+        {minhas.length>0&&(
+          <span style={{fontSize:11,color:'var(--t2)',background:'var(--surf2)',borderRadius:6,padding:'2px 8px',border:'1px solid var(--border)'}}>
+            {feitas}/{minhas.length}
+          </span>
+        )}
+      </div>
+
+      {/* Progress bar */}
+      {minhas.length>0&&(
+        <div style={{marginBottom:12}}>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--t3)',marginBottom:4}}>
+            <span style={{color:pct===100?cor:'var(--t3)',fontWeight:pct===100?700:400}}>
+              {pct===100?'Tudo concluído! 🎉':`${pct}% concluído`}
+            </span>
+            {pendentes.length>0&&<span>{pendentes.length} pendente{pendentes.length!==1?'s':''}</span>}
+          </div>
+          <div className="progress-bar" style={{height:5}}>
+            <div className="progress-fill" style={{width:`${pct}%`,background:cor}}/>
+          </div>
+        </div>
+      )}
+
+      {/* Lista pendentes */}
+      {pendentes.length===0&&concluidas.length===0?(
+        <div style={{textAlign:'center',padding:'28px 0',color:'var(--t3)',fontSize:12}}>
+          <div style={{width:36,height:36,borderRadius:10,background:'var(--surf2)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 10px'}}>
+            <Ic.Flag s={16} c='var(--t3)'/>
+          </div>
+          Nenhuma meta ainda
+        </div>
+      ):(
+        <>
+          {pendentes.map(m=>(
+            <MetaItem key={m.id} meta={m} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} onUpdateQtd={onUpdateQtd}/>
+          ))}
+          {concluidas.length>0&&(
+            <div>
+              <button onClick={()=>setShowDone(p=>!p)}
+                style={{fontSize:10,color:'var(--t3)',fontWeight:600,textTransform:'uppercase',letterSpacing:'.5px',padding:'8px 0 6px',borderTop:'1px solid var(--border)',marginTop:4,width:'100%',textAlign:'left',background:'none',border:'none',borderTop:'1px solid var(--border)',cursor:'pointer',display:'flex',alignItems:'center',gap:5}}>
+                {showDone?<Ic.ChevL s={10}/>:<Ic.ChevR s={10}/>}
+                Concluídas ({concluidas.length})
+              </button>
+              {showDone&&concluidas.map(m=>(
+                <MetaItem key={m.id} meta={m} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} onUpdateQtd={onUpdateQtd}/>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function NovaMetaModal({onSave,onClose,defaultPeriodo,defaultCategoria}){
+  const [f,setF]=useState({titulo:'',descricao:'',periodo:defaultPeriodo||'dia',categoria:defaultCategoria||'pessoal',prioridade:'media',tipo:'simples',metaQtd:'',unidade:''});
+  const upd=(k,v)=>setF(p=>({...p,[k]:v}));
+  const canSave=f.titulo.trim()&&(f.tipo==='simples'||(f.metaQtd&&Number(f.metaQtd)>=1));
+  const handleSave=()=>{
+    if(!canSave)return;
+    onSave({id:uid(),...f,metaQtd:f.tipo==='quantidade'?Number(f.metaQtd):undefined,atual:f.tipo==='quantidade'?0:undefined,concluido:false,concluidoEm:null,criadoEm:new Date().toISOString()});
+    onClose();
+  };
+  return(
+    <Modal onClose={onClose} sm>
+      <div className="modal-header">
+        <span className="modal-title">Nova Meta</span>
+        <button className="btn-icon" onClick={onClose}><Ic.X/></button>
+      </div>
+      <div className="modal-body">
+        <div className="field"><label>Título *</label><input value={f.titulo} onChange={e=>upd('titulo',e.target.value)} placeholder="Ex: Fechar 10 planos" autoFocus onKeyDown={e=>e.key==='Enter'&&canSave&&handleSave()}/></div>
+        <div className="field"><label>Descrição</label><textarea rows={2} value={f.descricao} onChange={e=>upd('descricao',e.target.value)} placeholder="Detalhes (opcional)"/></div>
+        <div className="field">
+          <label>Tipo de Meta</label>
+          <div style={{display:'flex',gap:6}}>
+            {[['simples','✓','Simples','Marcar como feito'],['quantidade','#','Quantidade','Contar progresso']].map(([v,ic,l,desc])=>(
+              <button key={v} onClick={()=>upd('tipo',v)}
+                style={{flex:1,padding:'8px 6px',borderRadius:9,border:`1.5px solid ${f.tipo===v?'var(--accent)':'var(--border2)'}`,background:f.tipo===v?'rgba(34,197,94,.12)':'transparent',color:f.tipo===v?'var(--accent)':'var(--t2)',fontSize:12,cursor:'pointer',fontWeight:f.tipo===v?700:400,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
+                <span style={{fontSize:15,fontWeight:800}}>{ic}</span>
+                <span style={{fontWeight:700}}>{l}</span>
+                <span style={{fontSize:10,opacity:.65}}>{desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        {f.tipo==='quantidade'&&(
+          <div style={{display:'flex',gap:10}}>
+            <div className="field" style={{flex:1,marginBottom:0}}>
+              <label>Meta (número) *</label>
+              <input type="number" min="1" value={f.metaQtd} onChange={e=>upd('metaQtd',e.target.value)} placeholder="Ex: 10"/>
+            </div>
+            <div className="field" style={{flex:1,marginBottom:0}}>
+              <label>Unidade (opcional)</label>
+              <input value={f.unidade} onChange={e=>upd('unidade',e.target.value)} placeholder="Ex: planos, km, livros"/>
+            </div>
+          </div>
+        )}
+        <div className="field">
+          <label>Categoria</label>
+          <div style={{display:'flex',gap:6}}>
+            {[['pessoal','👤 Pessoal','#818CF8','rgba(129,140,248,.15)'],['trabalho','💼 Trabalho','#F59E0B','rgba(245,158,11,.12)']].map(([v,l,c,bg])=>(
+              <button key={v} onClick={()=>upd('categoria',v)}
+                style={{flex:1,padding:'8px 0',borderRadius:9,border:`1.5px solid ${f.categoria===v?c:'var(--border2)'}`,background:f.categoria===v?bg:'transparent',color:f.categoria===v?c:'var(--t2)',fontSize:13,cursor:'pointer',fontWeight:f.categoria===v?700:400}}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label>Período</label>
+          <div style={{display:'flex',gap:6}}>
+            {[['dia','Hoje'],['semana','Semana'],['mes','Mês']].map(([v,l])=>(
+              <button key={v} onClick={()=>upd('periodo',v)}
+                style={{flex:1,padding:'7px 0',borderRadius:9,border:`1.5px solid ${f.periodo===v?'var(--accent)':'var(--border2)'}`,background:f.periodo===v?'rgba(34,197,94,.12)':'transparent',color:f.periodo===v?'var(--accent)':'var(--t2)',fontSize:12,cursor:'pointer',fontWeight:f.periodo===v?700:400}}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label>Prioridade</label>
+          <div className="prio-row">
+            {PRIO_META.map(p=>(
+              <button key={p.id} className="prio-btn" onClick={()=>upd('prioridade',p.id)}
+                style={f.prioridade===p.id?{borderColor:p.cor,background:`${p.cor}22`,color:p.cor}:{}}>
+                {p.id==='alta'?'🔴':p.id==='media'?'🟡':'🟢'} {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="modal-footer">
+        <button className="btn btn-ghost" onClick={onClose}>Cancelar</button>
+        <button className="btn btn-primary" onClick={handleSave} disabled={!canSave}>
+          <Ic.Check s={14}/> Adicionar
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+function EditMetaModal({meta,onSave,onClose}){
+  const [f,setF]=useState({tipo:'simples',metaQtd:'',unidade:'',...meta});
+  const upd=(k,v)=>setF(p=>({...p,[k]:v}));
+  const canSave=f.titulo.trim()&&(f.tipo==='simples'||(f.metaQtd&&Number(f.metaQtd)>=1));
+  return(
+    <Modal onClose={onClose} sm>
+      <div className="modal-header">
+        <span className="modal-title">Editar Meta</span>
+        <button className="btn-icon" onClick={onClose}><Ic.X/></button>
+      </div>
+      <div className="modal-body">
+        <div className="field"><label>Título</label><input value={f.titulo} onChange={e=>upd('titulo',e.target.value)}/></div>
+        <div className="field"><label>Descrição</label><textarea rows={2} value={f.descricao} onChange={e=>upd('descricao',e.target.value)} placeholder="Detalhes (opcional)"/></div>
+        <div className="field">
+          <label>Tipo de Meta</label>
+          <div style={{display:'flex',gap:6}}>
+            {[['simples','✓','Simples','Marcar como feito'],['quantidade','#','Quantidade','Contar progresso']].map(([v,ic,l,desc])=>(
+              <button key={v} onClick={()=>upd('tipo',v)}
+                style={{flex:1,padding:'8px 6px',borderRadius:9,border:`1.5px solid ${f.tipo===v?'var(--accent)':'var(--border2)'}`,background:f.tipo===v?'rgba(34,197,94,.12)':'transparent',color:f.tipo===v?'var(--accent)':'var(--t2)',fontSize:12,cursor:'pointer',fontWeight:f.tipo===v?700:400,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
+                <span style={{fontSize:15,fontWeight:800}}>{ic}</span>
+                <span style={{fontWeight:700}}>{l}</span>
+                <span style={{fontSize:10,opacity:.65}}>{desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        {f.tipo==='quantidade'&&(
+          <div style={{display:'flex',gap:10}}>
+            <div className="field" style={{flex:1,marginBottom:0}}>
+              <label>Meta (número) *</label>
+              <input type="number" min="1" value={f.metaQtd} onChange={e=>upd('metaQtd',e.target.value)} placeholder="Ex: 10"/>
+            </div>
+            <div className="field" style={{flex:1,marginBottom:0}}>
+              <label>Unidade (opcional)</label>
+              <input value={f.unidade||''} onChange={e=>upd('unidade',e.target.value)} placeholder="Ex: planos, km, livros"/>
+            </div>
+          </div>
+        )}
+        <div className="field">
+          <label>Categoria</label>
+          <div style={{display:'flex',gap:6}}>
+            {[['pessoal','👤 Pessoal','#818CF8','rgba(129,140,248,.15)'],['trabalho','💼 Trabalho','#F59E0B','rgba(245,158,11,.12)']].map(([v,l,c,bg])=>(
+              <button key={v} onClick={()=>upd('categoria',v)}
+                style={{flex:1,padding:'8px 0',borderRadius:9,border:`1.5px solid ${f.categoria===v?c:'var(--border2)'}`,background:f.categoria===v?bg:'transparent',color:f.categoria===v?c:'var(--t2)',fontSize:13,cursor:'pointer',fontWeight:f.categoria===v?700:400}}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label>Período</label>
+          <div style={{display:'flex',gap:6}}>
+            {[['dia','Hoje'],['semana','Semana'],['mes','Mês']].map(([v,l])=>(
+              <button key={v} onClick={()=>upd('periodo',v)}
+                style={{flex:1,padding:'7px 0',borderRadius:9,border:`1.5px solid ${f.periodo===v?'var(--accent)':'var(--border2)'}`,background:f.periodo===v?'rgba(34,197,94,.12)':'transparent',color:f.periodo===v?'var(--accent)':'var(--t2)',fontSize:12,cursor:'pointer',fontWeight:f.periodo===v?700:400}}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label>Prioridade</label>
+          <div className="prio-row">
+            {PRIO_META.map(p=>(
+              <button key={p.id} className="prio-btn" onClick={()=>upd('prioridade',p.id)}
+                style={f.prioridade===p.id?{borderColor:p.cor,background:`${p.cor}22`,color:p.cor}:{}}>
+                {p.id==='alta'?'🔴':p.id==='media'?'🟡':'🟢'} {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="modal-footer">
+        <button className="btn btn-ghost" onClick={onClose}>Cancelar</button>
+        <button className="btn btn-primary" disabled={!canSave} onClick={()=>{if(canSave)onSave({...f,metaQtd:f.tipo==='quantidade'?Number(f.metaQtd):undefined});}}>
+          <Ic.Check s={14}/> Salvar
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+// Início da semana = segunda-feira (padrão BR)
+function semanaIni(d){
+  const dow=d.getDay(); // 0=Dom,1=Seg...
+  const diff=dow===0?-6:1-dow;
+  return addDays(d,diff);
+}
+
+function isCurrentPeriod(meta){
+  const cr=new Date(meta.criadoEm);
+  const td=today();
+  if(meta.periodo==='dia') return toYMD(cr)===toYMD(td);
+  if(meta.periodo==='semana'){
+    const ini=semanaIni(td);
+    const fim=addDays(ini,6);
+    return cr>=ini&&cr<=new Date(fim.getFullYear(),fim.getMonth(),fim.getDate(),23,59,59);
+  }
+  if(meta.periodo==='mes') return cr.getFullYear()===td.getFullYear()&&cr.getMonth()===td.getMonth();
+  return true;
+}
+
+function fmtPeriodoLabel(meta){
+  const d=new Date(meta.criadoEm);
+  if(meta.periodo==='dia') return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+  if(meta.periodo==='semana'){
+    const ini=semanaIni(d);
+    const fim=addDays(ini,6);
+    return `Semana ${ini.getDate().toString().padStart(2,'0')}/${(ini.getMonth()+1).toString().padStart(2,'0')} – ${fim.getDate().toString().padStart(2,'0')}/${(fim.getMonth()+1).toString().padStart(2,'0')}`;
+  }
+  if(meta.periodo==='mes') return `${MESES[d.getMonth()]} ${d.getFullYear()}`;
+  return '';
+}
+
+function fmtPeriodoKey(meta){
+  const d=new Date(meta.criadoEm);
+  if(meta.periodo==='dia') return toYMD(d);
+  if(meta.periodo==='semana'){
+    const ini=semanaIni(d);
+    return `w_${toYMD(ini)}`;
+  }
+  if(meta.periodo==='mes') return `m_${d.getFullYear()}_${d.getMonth()}`;
+  return 'outro';
+}
+
+function HistoricoMetas({metas,onToggle,onDelete,onEdit,onUpdateQtd}){
+  const [aberto,setAberto]=useState(true);
+  const [expandidos,setExpandidos]=useState({});
+
+  const passadas=metas.filter(m=>!isCurrentPeriod(m))
+    .sort((a,b)=>new Date(b.criadoEm)-new Date(a.criadoEm));
+
+  if(passadas.length===0) return null;
+
+  // agrupar por período
+  const grupos={};
+  passadas.forEach(m=>{
+    const key=fmtPeriodoKey(m);
+    if(!grupos[key]) grupos[key]={label:fmtPeriodoLabel(m),metas:[],key};
+    grupos[key].metas.push(m);
+  });
+  const gruposList=Object.values(grupos);
+
+  const totalHist=passadas.length;
+  const feitasHist=passadas.filter(m=>m.concluido).length;
+
+  return(
+    <div style={{marginTop:20,borderTop:'1px solid var(--border)',paddingTop:16}}>
+      {/* Header do histórico */}
+      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:aberto?14:0,cursor:'pointer'}} onClick={()=>setAberto(p=>!p)}>
+        <div style={{display:'flex',alignItems:'center',gap:8,flex:1}}>
+          <Ic.Clock s={15} c='var(--t2)'/>
+          <span style={{fontFamily:'Syne',fontWeight:700,fontSize:14,color:'var(--t2)'}}>Histórico de Metas</span>
+          <span className="badge" style={{background:'rgba(255,255,255,.06)',color:'var(--t3)',fontSize:10}}>{totalHist} metas · {feitasHist} concluídas</span>
+        </div>
+        <div style={{color:'var(--t3)',fontSize:12,display:'flex',alignItems:'center',gap:5}}>
+          {aberto?<Ic.ChevL s={14}/>:<Ic.ChevR s={14}/>}
+          <span style={{fontSize:11}}>{aberto?'Recolher':'Expandir'}</span>
+        </div>
+      </div>
+
+      {aberto&&(
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          {gruposList.map(grupo=>{
+            const exp=expandidos[grupo.key]!==false; // aberto por padrão
+            const feitas=grupo.metas.filter(m=>m.concluido).length;
+            const pct=grupo.metas.length>0?Math.round((feitas/grupo.metas.length)*100):0;
+            return(
+              <div key={grupo.key} style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:13,overflow:'hidden'}}>
+                {/* grupo header */}
+                <div style={{padding:'12px 16px',display:'flex',alignItems:'center',gap:10,cursor:'pointer',borderBottom:exp?'1px solid var(--border)':'none'}}
+                  onClick={()=>setExpandidos(p=>({...p,[grupo.key]:!exp}))}>
+                  <div style={{flex:1,display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                    <span style={{fontWeight:600,fontSize:13}}>{grupo.label}</span>
+                    <span style={{fontSize:11,color:'var(--t3)'}}>{grupo.metas.length} meta{grupo.metas.length!==1?'s':''}</span>
+                    <div style={{display:'flex',alignItems:'center',gap:6}}>
+                      <div style={{width:60,height:4,background:'var(--surf3)',borderRadius:99,overflow:'hidden'}}>
+                        <div style={{height:'100%',width:`${pct}%`,background:pct===100?'var(--green)':pct>=50?'var(--amber)':'var(--t3)',borderRadius:99}}/>
+                      </div>
+                      <span style={{fontSize:10,color:pct===100?'var(--green)':pct>=50?'var(--amber)':'var(--t3)',fontWeight:600}}>{pct}%</span>
+                    </div>
+                  </div>
+                  <div style={{color:'var(--t3)',fontSize:11,display:'flex',alignItems:'center',gap:3}}>
+                    {exp?<Ic.ChevL s={12}/>:<Ic.ChevR s={12}/>}
+                  </div>
+                </div>
+                {/* grupo metas */}
+                {exp&&(
+                  <div style={{padding:'10px 16px'}}>
+                    {grupo.metas.map(m=>(
+                      <MetaItem key={m.id} meta={m} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} onUpdateQtd={onUpdateQtd}/>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MetasTab({metas,onSaveMetas}){
+  const [editMeta,setEditMeta]=useState(null);
+  const [showNova,setShowNova]=useState(false);
+  const [filtroCat,setFiltroCat]=useState('todas');
+
+  const handleAdd=(nova)=>{onSaveMetas([nova,...metas]);};
+  const handleToggle=(id)=>{
+    onSaveMetas(metas.map(m=>m.id===id?{...m,concluido:!m.concluido,concluidoEm:!m.concluido?new Date().toISOString():null}:m));
+  };
+  const handleDelete=(id)=>{if(!confirm('Excluir esta meta?'))return;onSaveMetas(metas.filter(m=>m.id!==id));};
+  const handleEdit=(meta)=>setEditMeta(meta);
+  const handleSaveEdit=(meta)=>{onSaveMetas(metas.map(m=>m.id===meta.id?meta:m));setEditMeta(null);};
+  const handleUpdateQtd=(id,delta)=>{
+    onSaveMetas(metas.map(m=>{
+      if(m.id!==id)return m;
+      const novoAtual=Math.max(0,Math.min((m.atual||0)+delta,m.metaQtd));
+      const concluido=novoAtual>=m.metaQtd;
+      return {...m,atual:novoAtual,concluido,concluidoEm:concluido&&!m.concluido?new Date().toISOString():m.concluidoEm};
+    }));
+  };
+
+  const metasAtuais=metas.filter(isCurrentPeriod);
+  const metasFiltradas=filtroCat==='todas'?metasAtuais:metasAtuais.filter(m=>(m.categoria||'pessoal')===filtroCat);
+  const total=metasFiltradas.length;
+  const feitas=metasFiltradas.filter(m=>m.concluido).length;
+  const pctGeral=total>0?Math.round((feitas/total)*100):0;
+
+  const countPessoal=metasAtuais.filter(m=>(m.categoria||'pessoal')==='pessoal').length;
+  const countTrabalho=metasAtuais.filter(m=>m.categoria==='trabalho').length;
+
+  const sections=[
+    {periodo:'dia',titulo:'Hoje',cor:'#22C55E',icone:<Ic.Sun s={14} c='#22C55E'/>},
+    {periodo:'semana',titulo:'Esta Semana',cor:'#F59E0B',icone:<Ic.Calendar s={14} c='#F59E0B'/>},
+    {periodo:'mes',titulo:'Este Mês',cor:'#4ADE80',icone:<Ic.Flag s={14} c='#4ADE80'/>},
+  ];
+
+  return(
+    <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}} className="fade-in">
+      {/* Header */}
+      <div style={{padding:'14px 24px',borderBottom:'1px solid var(--border)',flexShrink:0,display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
+        <div>
+          <div style={{fontFamily:'Syne',fontWeight:700,fontSize:18}}>Metas & Objetivos</div>
+          <div style={{fontSize:12,color:'var(--t2)',marginTop:2}}>Metas pessoais e de trabalho — do dia, semana e mês</div>
+        </div>
+        <div style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+          {total>0&&(
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontSize:11,color:'var(--t2)'}}>Progresso atual</div>
+                <div style={{fontFamily:'Syne',fontWeight:800,fontSize:20,color:'var(--accent)'}}>{pctGeral}%</div>
+              </div>
+              <div style={{width:84}}>
+                <div style={{fontSize:10,color:'var(--t3)',marginBottom:3}}>{feitas}/{total} concluídas</div>
+                <div className="progress-bar" style={{height:7}}>
+                  <div className="progress-fill" style={{width:`${pctGeral}%`,background:'var(--accent)'}}/>
+                </div>
+              </div>
+            </div>
+          )}
+          <button className="btn btn-primary" style={{gap:6,paddingLeft:12,paddingRight:14}} onClick={()=>setShowNova(true)}>
+            <Ic.Plus s={14}/> Nova Meta
+          </button>
+        </div>
+      </div>
+
+      {/* Filtros de categoria */}
+      <div style={{padding:'10px 24px',borderBottom:'1px solid var(--border)',flexShrink:0,display:'flex',alignItems:'center',gap:8}}>
+        <button onClick={()=>setFiltroCat('todas')}
+          className={`meta-cat-tab${filtroCat==='todas'?' active-todas':''}`}>
+          Todas {metasAtuais.length>0&&<span style={{opacity:.7,fontSize:10}}>({metasAtuais.length})</span>}
+        </button>
+        <button onClick={()=>setFiltroCat('pessoal')}
+          className={`meta-cat-tab${filtroCat==='pessoal'?' active-pessoal':''}`}>
+          👤 Pessoal {countPessoal>0&&<span style={{opacity:.7,fontSize:10}}>({countPessoal})</span>}
+        </button>
+        <button onClick={()=>setFiltroCat('trabalho')}
+          className={`meta-cat-tab${filtroCat==='trabalho'?' active-trabalho':''}`}>
+          💼 Trabalho {countTrabalho>0&&<span style={{opacity:.7,fontSize:10}}>({countTrabalho})</span>}
+        </button>
+      </div>
+
+      {/* Scroll area */}
+      <div style={{flex:1,overflow:'auto',padding:'16px 24px'}}>
+        {/* Colunas atuais */}
+        <div className="metas-cols">
+          {sections.map(sec=>(
+            <MetaSection key={sec.periodo}
+              titulo={sec.titulo} cor={sec.cor} icone={sec.icone}
+              periodo={sec.periodo} metas={metasFiltradas}
+              onAdd={handleAdd} onToggle={handleToggle}
+              onDelete={handleDelete} onEdit={handleEdit}
+              onUpdateQtd={handleUpdateQtd}
+            />
+          ))}
+        </div>
+
+        {/* Histórico de períodos anteriores */}
+        <HistoricoMetas
+          metas={filtroCat==='todas'?metas:metas.filter(m=>(m.categoria||'pessoal')===filtroCat)}
+          onToggle={handleToggle}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+          onUpdateQtd={handleUpdateQtd}
+        />
+      </div>
+
+      {showNova&&(
+        <NovaMetaModal
+          onSave={handleAdd}
+          onClose={()=>setShowNova(false)}
+          defaultCategoria={filtroCat==='todas'?'pessoal':filtroCat}
+        />
+      )}
+      {editMeta&&(
+        <EditMetaModal meta={editMeta} onSave={handleSaveEdit} onClose={()=>setEditMeta(null)}/>
+      )}
+    </div>
+  );
+}
+
+/* ─────────── GOOGLE SECTION ─────────── */
+function GoogleSection({gg}){
+  const [cid,setCid]=useState(GG.clientId());
+  const [connecting,setConnecting]=useState(false);
+
+  const handleConnect=async()=>{
+    if(!cid.trim())return;
+    GG.saveCid(cid.trim());
+    setConnecting(true);
+    await gg.connect();
+    setConnecting(false);
+  };
+
+  const handleDisconnect=()=>{
+    if(!confirm('Desconectar do Google Agenda? Os eventos importados do Google serão removidos da agenda local.'))return;
+    gg.disconnect();
+  };
+
+  return(
+    <div className="perfil-section fade-in">
+      <div className="perfil-section-title">
+        <Ic.Google s={16}/> Google Agenda
+      </div>
+
+      {gg.connected?(
+        <>
+          {/* Status conectado */}
+          <div style={{display:'flex',alignItems:'center',gap:10,background:'rgba(34,197,94,.08)',border:'1px solid rgba(34,197,94,.2)',borderRadius:12,padding:'12px 16px',marginBottom:14}}>
+            <Ic.CheckCircle s={18} c='var(--accent)'/>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:600}}>Conectado ao Google Agenda</div>
+              {gg.lastSync&&<div style={{fontSize:11,color:'var(--t2)',marginTop:2}}>
+                Última sync: {gg.lastSync.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+              </div>}
+            </div>
+          </div>
+
+          {gg.error&&(
+            <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:12,color:'var(--red)',fontSize:12,background:'rgba(239,68,68,.08)',border:'1px solid rgba(239,68,68,.18)',borderRadius:9,padding:'9px 12px'}}>
+              <Ic.AlertTriangle s={13} c='var(--red)'/> {gg.error}
+            </div>
+          )}
+
+          <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:14}}>
+            <button className="btn btn-primary btn-sm" onClick={gg.sync} disabled={gg.syncing} style={{gap:6}}>
+              <Ic.Refresh s={13} c='#000' spin={gg.syncing}/>
+              {gg.syncing?'Sincronizando...':'Sincronizar agora'}
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={handleDisconnect} style={{color:'var(--t3)'}}>
+              Desconectar
+            </button>
+          </div>
+
+          <div style={{fontSize:11,color:'var(--t3)',lineHeight:1.7,background:'var(--surf2)',borderRadius:10,padding:'10px 14px',border:'1px solid var(--border)'}}>
+            ✓ Eventos criados aqui são enviados ao Google automaticamente<br/>
+            ✓ Eventos do Google aparecem na agenda ao sincronizar<br/>
+            ✓ Exclusões são refletidas nos dois lados
+          </div>
+        </>
+      ):(
+        <>
+          <div style={{fontSize:12,color:'var(--t2)',lineHeight:1.7,marginBottom:16}}>
+            Conecte o Google Agenda para sincronizar eventos nos dois sentidos. Você precisará de um <strong style={{color:'var(--t1)'}}>Client ID</strong> do Google Cloud Console (gratuito).
+          </div>
+
+          <div className="field">
+            <label>Google OAuth Client ID</label>
+            <input value={cid} onChange={e=>setCid(e.target.value)} placeholder="XXXXXXXX.apps.googleusercontent.com" style={{fontFamily:'monospace',fontSize:12}}/>
+          </div>
+
+          {gg.error&&(
+            <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:12,color:'var(--red)',fontSize:12,background:'rgba(239,68,68,.08)',border:'1px solid rgba(239,68,68,.18)',borderRadius:9,padding:'9px 12px'}}>
+              <Ic.AlertTriangle s={13} c='var(--red)'/> {gg.error}
+            </div>
+          )}
+
+          <button className="btn btn-primary btn-sm" onClick={handleConnect} disabled={!cid.trim()||connecting} style={{marginBottom:20,gap:6}}>
+            <Ic.Google s={14}/> {connecting?'Aguardando login...':'Conectar Google Agenda'}
+          </button>
+
+          {/* Passo a passo */}
+          <div style={{background:'var(--surf2)',border:'1px solid var(--border)',borderRadius:13,padding:16}}>
+            <div style={{fontWeight:700,fontSize:12,marginBottom:12,color:'var(--t1)',display:'flex',alignItems:'center',gap:7}}>
+              <Ic.Info s={13} c='var(--accent)'/> Como obter o Client ID (5 min, gratuito)
+            </div>
+            {[
+              ['1','Acesse o Google Cloud Console','console.cloud.google.com'],
+              ['2','Crie um projeto ou selecione um existente',''],
+              ['3','Vá em "APIs e Serviços" → "Biblioteca" → ative a "Google Calendar API"',''],
+              ['4','Vá em "Credenciais" → "Criar credenciais" → "ID do cliente OAuth 2.0"',''],
+              ['5','Tipo: Aplicativo da Web. Em "Origens JavaScript autorizadas" adicione sua URL (ex: http://localhost:3333)',''],
+              ['6','Copie o Client ID gerado e cole no campo acima',''],
+            ].map(([n,txt,url])=>(
+              <div key={n} style={{display:'flex',gap:8,marginBottom:8,alignItems:'flex-start'}}>
+                <span style={{minWidth:20,height:20,borderRadius:'50%',background:'rgba(34,197,94,.15)',color:'var(--accent)',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:1}}>{n}</span>
+                <span style={{fontSize:11,color:'var(--t2)',lineHeight:1.5}}>{txt}{url&&<span style={{display:'block',color:'var(--accent)',fontFamily:'monospace',fontSize:10,marginTop:2}}>{url}</span>}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─────────── PERFIL TAB ─────────── */
+function compressImage(file,maxPx=260,quality=0.82){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const scale=Math.min(1,maxPx/Math.max(img.width,img.height));
+        const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.onerror=reject;
+      img.src=e.target.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function PerfilTab({session,onUpdateSession,onLogout,userPhoto,onUpdatePhoto,gg}){
+  const [secao,setSecao]=useState('info');
+  const getUser=()=>authStore.users().find(u=>u.id===session.userId)||{};
+  const [user,setUserData]=useState(getUser);
+  const [uploading,setUploading]=useState(false);
+  const fileRef=useRef();
+
+  // info pessoal
+  const [nome,setNome]=useState(user.nome||'');
+  const [bio,setBio]=useState(user.bio||'');
+  const [infoOk,setInfoOk]=useState(false);
+
+  // alterar login
+  const [novoLogin,setNovoLogin]=useState(user.username||'');
+  const [senhaParaLogin,setSenhaParaLogin]=useState('');
+  const [loginMsg,setLoginMsg]=useState({err:'',ok:''});
+  const [showSenhaLogin,setShowSenhaLogin]=useState(false);
+
+  // alterar senha
+  const [senhaAtual,setSenhaAtual]=useState('');
+  const [novaSenha,setNovaSenha]=useState('');
+  const [confSenha,setConfSenha]=useState('');
+  const [showPw,setShowPw]=useState({a:false,n:false,c:false});
+  const [senhaMsg,setSenhaMsg]=useState({err:'',ok:''});
+
+  const initials=(user.nome||user.username||'??').slice(0,2).toUpperCase();
+  const criadoEm=user.criadoEm?new Date(user.criadoEm):null;
+
+  const handlePhotoSelect=async(e)=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    if(!file.type.startsWith('image/'))return alert('Selecione uma imagem (JPG, PNG, WEBP...).');
+    setUploading(true);
+    try{
+      const compressed=await compressImage(file);
+      onUpdatePhoto(compressed);
+    }catch(err){alert('Erro ao processar imagem.');}
+    finally{setUploading(false);if(fileRef.current)fileRef.current.value='';}
+  };
+
+  const handleRemovePhoto=()=>{
+    if(!confirm('Remover foto de perfil?'))return;
+    onUpdatePhoto(null);
+  };
+
+  const updateUser=(changes)=>{
+    const users=authStore.users();
+    const updated=users.map(u=>u.id===session.userId?{...u,...changes}:u);
+    authStore.saveUsers(updated);
+    setUserData(p=>({...p,...changes}));
+  };
+
+  const handleSaveInfo=()=>{
+    updateUser({nome:nome.trim(),bio:bio.trim()});
+    const newSess={...session,nome:nome.trim()};
+    authStore.saveSession(newSess);
+    onUpdateSession(newSess);
+    setInfoOk(true);
+    setTimeout(()=>setInfoOk(false),2500);
+  };
+
+  const handleSaveLogin=()=>{
+    setLoginMsg({err:'',ok:''});
+    const novoTrimmed=novoLogin.trim();
+    if(!novoTrimmed)return setLoginMsg({err:'Informe o novo nome de usuário.',ok:''});
+    const cur=authStore.users().find(u=>u.id===session.userId);
+    if(!cur||cur.password!==senhaParaLogin)return setLoginMsg({err:'Senha incorreta.',ok:''});
+    const existe=authStore.users().find(u=>u.id!==session.userId&&u.username.toLowerCase()===novoTrimmed.toLowerCase());
+    if(existe)return setLoginMsg({err:'Este nome já está em uso.',ok:''});
+    updateUser({username:novoTrimmed});
+    const newSess={...session,username:novoTrimmed};
+    authStore.saveSession(newSess);
+    onUpdateSession(newSess);
+    setSenhaParaLogin('');
+    setLoginMsg({err:'',ok:'Login atualizado com sucesso!'});
+    setTimeout(()=>setLoginMsg({err:'',ok:''}),3000);
+  };
+
+  const handleSaveSenha=()=>{
+    setSenhaMsg({err:'',ok:''});
+    if(!senhaAtual||!novaSenha||!confSenha)return setSenhaMsg({err:'Preencha todos os campos.',ok:''});
+    const cur=authStore.users().find(u=>u.id===session.userId);
+    if(!cur||cur.password!==senhaAtual)return setSenhaMsg({err:'Senha atual incorreta.',ok:''});
+    if(novaSenha.length<4)return setSenhaMsg({err:'Mínimo 4 caracteres.',ok:''});
+    if(novaSenha!==confSenha)return setSenhaMsg({err:'Senhas não coincidem.',ok:''});
+    updateUser({password:novaSenha});
+    setSenhaAtual('');setNovaSenha('');setConfSenha('');
+    setSenhaMsg({err:'',ok:'Senha alterada com sucesso!'});
+    setTimeout(()=>setSenhaMsg({err:'',ok:''}),3000);
+  };
+
+  const handleDeleteAccount=()=>{
+    if(!confirm('Tem certeza que deseja excluir sua conta?\nTodos os seus dados serão apagados permanentemente.'))return;
+    const conf=prompt('Para confirmar, digite  EXCLUIR  (em maiúsculas):');
+    if(conf!=='EXCLUIR'){alert('Confirmação incorreta. Conta mantida.');return;}
+    const users=authStore.users().filter(u=>u.id!==session.userId);
+    authStore.saveUsers(users);
+    ['ev','pl','pin','mt'].forEach(k=>localStorage.removeItem(`if_${k}_${session.userId}`));
+    onLogout();
+  };
+
+  const PwField=({label,value,onChange,show,onToggle,placeholder})=>(
+    <div className="field">
+      <label>{label}</label>
+      <div className="pw-wrap">
+        <input type={show?'text':'password'} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||'••••••••'}/>
+        <button className="pw-eye" type="button" onClick={onToggle}>{show?<Ic.EyeOff s={14}/>:<Ic.Eye s={14}/>}</button>
+      </div>
+    </div>
+  );
+
+  const TABS=[
+    {id:'info',label:'Informações',icon:<Ic.User s={13}/>},
+    {id:'login',label:'Login',icon:<Ic.AtSign s={13}/>},
+    {id:'senha',label:'Senha',icon:<Ic.Key s={13}/>},
+    {id:'google',label:'Google',icon:<Ic.Google s={13}/>},
+  ];
+
+  return(
+    <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}} className="fade-in">
+      {/* Topbar extra */}
+      <div style={{padding:'14px 24px',borderBottom:'1px solid var(--border)',flexShrink:0}}>
+        <div style={{fontFamily:'Syne',fontWeight:700,fontSize:18}}>Meu Perfil</div>
+        <div style={{fontSize:12,color:'var(--t2)',marginTop:2}}>Gerencie suas informações e configurações de acesso</div>
+      </div>
+
+      <div className="perfil-wrap">
+        {/* Hidden file input */}
+        <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={handlePhotoSelect}/>
+
+        {/* Hero / Avatar */}
+        <div className="perfil-hero">
+          <div className="avatar-upload-wrap" onClick={()=>fileRef.current?.click()} title="Alterar foto">
+            {userPhoto
+              ? <img src={userPhoto} className="perfil-avatar-photo" alt="Foto de perfil"/>
+              : <div className="perfil-avatar-big">{uploading?'..':initials}</div>
+            }
+            <div className="avatar-overlay">
+              <Ic.Camera s={18} c='#fff'/>
+              <span>{userPhoto?'Alterar':'Adicionar'}</span>
+            </div>
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:'Syne',fontWeight:800,fontSize:20,marginBottom:3}}>{user.nome||user.username}</div>
+            {user.nome&&<div style={{fontSize:13,color:'var(--t2)',marginBottom:4}}>@{user.username}</div>}
+            {user.bio&&<div style={{fontSize:12,color:'var(--t3)',lineHeight:1.5}}>{user.bio}</div>}
+            <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap',alignItems:'center'}}>
+              {criadoEm&&(
+                <span style={{fontSize:11,color:'var(--t3)',display:'flex',alignItems:'center',gap:4,background:'var(--surf2)',border:'1px solid var(--border)',borderRadius:7,padding:'3px 9px'}}>
+                  <Ic.Calendar s={11} c='var(--t3)'/> Desde {criadoEm.toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}
+                </span>
+              )}
+              <span style={{fontSize:11,color:'var(--accent)',display:'flex',alignItems:'center',gap:4,background:'rgba(34,197,94,.08)',border:'1px solid rgba(34,197,94,.18)',borderRadius:7,padding:'3px 9px'}}>
+                <Ic.Shield s={11} c='var(--accent)'/> Conta ativa
+              </span>
+              <button className="btn btn-ghost btn-xs" onClick={()=>fileRef.current?.click()} style={{fontSize:11,gap:4}}>
+                <Ic.Camera s={12}/> {userPhoto?'Alterar foto':'Adicionar foto'}
+              </button>
+              {userPhoto&&(
+                <button className="btn btn-xs" onClick={handleRemovePhoto}
+                  style={{fontSize:11,gap:4,color:'var(--t3)',border:'1px solid var(--border2)',background:'transparent'}}>
+                  <Ic.ImageOff s={12}/> Remover
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="perfil-tabs">
+          {TABS.map(t=>(
+            <div key={t.id} className={`perfil-tab ${secao===t.id?'active':''}`} onClick={()=>setSecao(t.id)}>
+              {t.icon}{t.label}
+            </div>
+          ))}
+        </div>
+
+        {/* ── Seção: Info ── */}
+        {secao==='info'&&(
+          <div className="perfil-section fade-in">
+            <div className="perfil-section-title"><Ic.User s={15} c='var(--accent)'/> Informações Pessoais</div>
+            <div className="field">
+              <label>Nome completo</label>
+              <input value={nome} onChange={e=>setNome(e.target.value)} placeholder="Seu nome completo..."/>
+            </div>
+            <div className="field">
+              <label>Bio / Descrição</label>
+              <textarea rows={3} value={bio} onChange={e=>setBio(e.target.value)} placeholder="Uma frase sobre você (opcional)..."/>
+            </div>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10,marginTop:6}}>
+              <div>
+                {infoOk&&(
+                  <div className="perfil-msg-ok"><Ic.Check s={13} c='var(--green)'/> Informações salvas!</div>
+                )}
+              </div>
+              <button className="btn btn-primary" onClick={handleSaveInfo}>
+                <Ic.Check s={14}/> Salvar informações
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Seção: Login ── */}
+        {secao==='login'&&(
+          <div className="perfil-section fade-in">
+            <div className="perfil-section-title"><Ic.AtSign s={15} c='var(--accent)'/> Alterar Nome de Login</div>
+            <div style={{fontSize:12,color:'var(--t2)',background:'var(--surf2)',borderRadius:9,padding:'10px 14px',marginBottom:16,border:'1px solid var(--border)',display:'flex',alignItems:'flex-start',gap:8}}>
+              <Ic.Info s={14} c='var(--t2)'/> Login atual: <strong style={{color:'var(--t1)'}}>{user.username}</strong>
+            </div>
+            <div className="field">
+              <label>Novo nome de usuário</label>
+              <input value={novoLogin} onChange={e=>setNovoLogin(e.target.value)} placeholder="Novo login..."/>
+            </div>
+            <PwField
+              label="Confirme sua senha atual"
+              value={senhaParaLogin}
+              onChange={setSenhaParaLogin}
+              show={showSenhaLogin}
+              onToggle={()=>setShowSenhaLogin(p=>!p)}
+              placeholder="Senha para confirmar"
+            />
+            {loginMsg.err&&<div className="perfil-msg-err"><Ic.AlertTriangle s={13} c='var(--red)'/> {loginMsg.err}</div>}
+            {loginMsg.ok&&<div className="perfil-msg-ok"><Ic.Check s={13} c='var(--green)'/> {loginMsg.ok}</div>}
+            <div style={{display:'flex',justifyContent:'flex-end',marginTop:16}}>
+              <button className="btn btn-primary" onClick={handleSaveLogin}>
+                <Ic.Check s={14}/> Atualizar login
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Seção: Senha ── */}
+        {secao==='senha'&&(
+          <div className="perfil-section fade-in">
+            <div className="perfil-section-title"><Ic.Key s={15} c='var(--accent)'/> Alterar Senha</div>
+            <PwField label="Senha atual" value={senhaAtual} onChange={setSenhaAtual} show={showPw.a} onToggle={()=>setShowPw(p=>({...p,a:!p.a}))}/>
+            <PwField label="Nova senha" value={novaSenha} onChange={setNovaSenha} show={showPw.n} onToggle={()=>setShowPw(p=>({...p,n:!p.n}))} placeholder="Mínimo 4 caracteres"/>
+            <PwField label="Confirmar nova senha" value={confSenha} onChange={setConfSenha} show={showPw.c} onToggle={()=>setShowPw(p=>({...p,c:!p.c}))} placeholder="Repita a nova senha"/>
+            {/* strength bar */}
+            {novaSenha&&(
+              <div style={{marginBottom:14}}>
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--t3)',marginBottom:4}}>
+                  <span>Força da senha</span>
+                  <span style={{color:novaSenha.length>=8?'var(--green)':novaSenha.length>=6?'var(--amber)':'var(--red)'}}>
+                    {novaSenha.length>=8?'Forte':novaSenha.length>=6?'Média':'Fraca'}
+                  </span>
+                </div>
+                <div className="progress-bar" style={{height:4}}>
+                  <div className="progress-fill" style={{
+                    width:`${novaSenha.length>=8?100:novaSenha.length>=6?66:33}%`,
+                    background:novaSenha.length>=8?'var(--green)':novaSenha.length>=6?'var(--amber)':'var(--red)'
+                  }}/>
+                </div>
+              </div>
+            )}
+            {senhaMsg.err&&<div className="perfil-msg-err"><Ic.AlertTriangle s={13} c='var(--red)'/> {senhaMsg.err}</div>}
+            {senhaMsg.ok&&<div className="perfil-msg-ok"><Ic.Check s={13} c='var(--green)'/> {senhaMsg.ok}</div>}
+            <div style={{display:'flex',justifyContent:'flex-end',marginTop:16}}>
+              <button className="btn btn-primary" onClick={handleSaveSenha}>
+                <Ic.Lock s={14}/> Alterar senha
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Seção: Google ── */}
+        {secao==='google'&&<GoogleSection gg={gg}/>}
+
+        {/* ── Zona de perigo ── */}
+        <div className="perfil-danger">
+          <div style={{fontFamily:'Syne',fontWeight:700,fontSize:13,color:'var(--red)',display:'flex',alignItems:'center',gap:7,marginBottom:12}}>
+            <Ic.AlertTriangle s={14} c='var(--red)'/> Zona de Perigo
+          </div>
+          <div style={{fontSize:12,color:'var(--t2)',marginBottom:14,lineHeight:1.6}}>
+            Excluir sua conta apaga permanentemente todos os seus dados — agenda, planos, metas e histórico. Esta ação <strong style={{color:'var(--t1)'}}>não pode ser desfeita</strong>.
+          </div>
+          <button className="btn btn-danger btn-sm" onClick={handleDeleteAccount}>
+            <Ic.Trash s={13}/> Excluir minha conta
+          </button>
+        </div>
+
+        {/* Logout rápido */}
+        <div style={{display:'flex',justifyContent:'flex-end',paddingBottom:20}}>
+          <button className="btn btn-ghost btn-sm" onClick={onLogout} style={{color:'var(--t3)'}}>
+            <Ic.LogOut s={13}/> Sair da conta
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── SIDEBAR NAV ─────────── */
+function Sidebar({aba,onAba,collapsed,onToggle,user,onLogout,userPhoto,mobileOpen,onCloseMobile}){
+  const items=[
+    {id:'dashboard',label:'Dashboard',icon:<Ic.Dash/>},
+    {id:'agenda',label:'Agenda',icon:<Ic.Calendar/>},
+    {id:'planejar',label:'Planejar Dia',icon:<Ic.Plan/>},
+    {id:'meudia',label:'Meu Dia',icon:<Ic.Today/>},
+    {id:'metas',label:'Metas',icon:<Ic.Flag/>},
+  ];
+  const displayName=user?.nome||user?.username||'?';
+  const initials=displayName.slice(0,2).toUpperCase();
+
+  const handleNav=(id)=>{onAba(id);if(onCloseMobile)onCloseMobile();};
+
+  return(
+    <>
+      {/* Mobile overlay backdrop */}
+      {mobileOpen&&<div className="sidebar-overlay" onClick={onCloseMobile}/>}
+      <div className={`sidebar ${collapsed?'collapsed':''} ${mobileOpen?'mobile-open':''}`}>
+        <div className="sidebar-logo">
+          <button className="sidebar-toggle" onClick={onToggle}><Ic.Menu s={19}/></button>
+          <div className="sidebar-logo-text">
+            <span style={{color:'#F0FFF4'}}>Inovit </span>
+            <span style={{color:'#22C55E'}}>Flow</span>
+          </div>
+          {/* Mobile close button */}
+          <button className="sidebar-toggle" onClick={onCloseMobile} style={{marginLeft:'auto',display:'none'}} id="sidebar-close-btn">
+            <Ic.X s={18}/>
+          </button>
+        </div>
+        <div className="sidebar-nav">
+          {!collapsed&&<div style={{fontSize:10,color:'var(--t3)',fontWeight:600,textTransform:'uppercase',letterSpacing:'.7px',padding:'6px 12px 8px'}}>Menu</div>}
+          {items.map(item=>(
+            <div key={item.id} className={`nav-item ${aba===item.id?'active':''}`} onClick={()=>handleNav(item.id)} title={collapsed?item.label:''}>
+              <div className="icon-wrap" style={{color:aba===item.id?'var(--accent)':'var(--t2)'}}>{item.icon}</div>
+              <span className="label">{item.label}</span>
+            </div>
+          ))}
+          {!collapsed&&<div style={{fontSize:10,color:'var(--t3)',fontWeight:600,textTransform:'uppercase',letterSpacing:'.7px',padding:'12px 12px 8px',borderTop:'1px solid var(--border)',marginTop:6}}>Conta</div>}
+          {collapsed&&<div style={{height:14,borderTop:'1px solid var(--border)',marginTop:6,marginBottom:6}}/>}
+          <div className={`nav-item ${aba==='perfil'?'active':''}`} onClick={()=>handleNav('perfil')} title={collapsed?'Perfil':''}>
+            <div className="icon-wrap" style={{color:aba==='perfil'?'var(--accent)':'var(--t2)'}}><Ic.User/></div>
+            <span className="label">Perfil</span>
+          </div>
+        </div>
+        <div className="sidebar-bottom">
+          <div className="sidebar-user" onClick={()=>handleNav('perfil')} title={collapsed?`${displayName} — Perfil`:''} style={{cursor:'pointer'}}>
+            <div className="user-avatar" style={{background:userPhoto?'transparent':aba==='perfil'?'linear-gradient(135deg,#4ADE80,#22C55E)':'linear-gradient(135deg,#22C55E,#16A34A)',padding:0,overflow:'hidden'}}>
+              {userPhoto?<img src={userPhoto} className="sidebar-avatar-photo" alt=""/>:initials}
+            </div>
+            <div className="sidebar-user-info" style={{flex:1,overflow:'hidden'}}>
+              <div style={{fontWeight:600,fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{displayName}</div>
+              <div style={{fontSize:10,color:'var(--t2)',display:'flex',alignItems:'center',gap:3,marginTop:1}}><Ic.User s={10}/> Ver perfil</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ─────────── TOPBAR ─────────── */
+function Topbar({aba,clock,hora,eventos,onOpenSidebar}){
+  const labels={dashboard:'Dashboard',agenda:'Agenda',planejar:'Planejar Dia',meudia:'Meu Dia',metas:'Metas & Objetivos',perfil:'Meu Perfil'};
+  const todayYMD=toYMD(today());
+  const nm=toMins(clock);
+  const agEvs=getEvForDate(eventos,todayYMD);
+  const prox=[...agEvs].filter(e=>toMins(e.horaInicio)>nm).sort((a,b)=>toMins(a.horaInicio)-toMins(b.horaInicio))[0];
+  return(
+    <div className="topbar">
+      <button className="topbar-burger" onClick={onOpenSidebar}><Ic.Menu s={20}/></button>
+      <div className="topbar-title">{labels[aba]||''}</div>
+      {prox&&aba!=='meudia'&&(
+        <div className="topbar-prox" style={{display:'flex',alignItems:'center',gap:7,padding:'5px 12px',background:'rgba(34,197,94,.08)',borderRadius:9,border:'1px solid rgba(34,197,94,.18)'}}>
+          <Ic.Today s={13} c='var(--accent)'/>
+          <span style={{fontSize:12,fontWeight:500}}>{prox.titulo}</span>
+          <span style={{fontSize:11,color:'var(--t2)',fontVariantNumeric:'tabular-nums'}}><Countdown targetTime={prox.horaInicio}/></span>
+        </div>
+      )}
+      {hora>=20&&(
+        <div className="topbar-night" style={{display:'flex',alignItems:'center',gap:5,padding:'5px 11px',background:'rgba(34,197,94,.07)',borderRadius:9,border:'1px solid rgba(34,197,94,.16)'}}>
+          <Ic.Moon s={13} c='var(--accent)'/>
+          <span style={{fontSize:12,color:'var(--accent2)'}}>Planejou amanhã?</span>
+        </div>
+      )}
+      <div className="topbar-time">{clock}</div>
+    </div>
+  );
+}
+
+/* ─────────── BOTTOM NAV (mobile) ─────────── */
+function BottomNav({aba,onAba}){
+  const items=[
+    {id:'dashboard',icon:<Ic.Dash s={20}/>,label:'Dash'},
+    {id:'agenda',icon:<Ic.Calendar s={20}/>,label:'Agenda'},
+    {id:'meudia',icon:<Ic.Today s={20}/>,label:'Hoje'},
+    {id:'metas',icon:<Ic.Flag s={20}/>,label:'Metas'},
+    {id:'perfil',icon:<Ic.User s={20}/>,label:'Perfil'},
+  ];
+  return(
+    <nav className="bottom-nav">
+      {items.map(it=>(
+        <div key={it.id} className={`bnav-item ${aba===it.id?'active':''}`} onClick={()=>onAba(it.id)}>
+          {it.icon}
+          <span>{it.label}</span>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+/* ─────────── APP ─────────── */
+function App(){
+  const [session,setSession]=useState(()=>authStore.session());
+  const [aba,setAba]=useState('agenda');
+  const [collapsed,setCollapsed]=useState(false);
+  const [mobileOpen,setMobileOpen]=useState(false);
+  const [clock,setClock]=useState(nowTime());
+  const hora=parseInt(clock.split(':')[0]);
+
+  // user-scoped store
+  const store=useMemo(()=>session?makeStore(session.userId):null,[session]);
+
+  const [eventos,setEventos]=useState(()=>store?store.evs():[]);
+  const [planos,setPlanos]=useState(()=>store?store.plans():{});
+  const [pinnedBlocos,setPinnedBlocos]=useState(()=>store?store.pinned():[]);
+  const [metas,setMetas]=useState(()=>store?store.metas():[]);
+  const [userPhoto,setUserPhoto]=useState(()=>session?authStore.photo(session.userId):null);
+
+  // Google state
+  const [ggConnected,setGgConnected]=useState(()=>GG.connected()&&!GG.expired());
+  const [ggSyncing,setGgSyncing]=useState(false);
+  const [ggLastSync,setGgLastSync]=useState(null);
+  const [ggError,setGgError]=useState(null);
+
+  useEffect(()=>{const iv=setInterval(()=>setClock(nowTime()),60000);return()=>clearInterval(iv);},[]);
+
+  // reload data when session changes
+  useEffect(()=>{
+    if(store){setEventos(store.evs());setPlanos(store.plans());setPinnedBlocos(store.pinned());setMetas(store.metas());}
+    if(session){setUserPhoto(authStore.photo(session.userId));}
+  },[store]);
+
+  // Init GIS + auto-sync on load if connected
+  useEffect(()=>{
+    if(!GG.clientId())return;
+    ggEnsureClient().then(()=>{
+      if(GG.connected()&&!GG.expired())doGgSync();
+    }).catch(()=>{});
+  },[]);
+
+  const doGgSync=async()=>{
+    if(!GG.connected())return;
+    setGgSyncing(true);setGgError(null);
+    try{
+      if(GG.expired())await ggRequestToken('');
+      const merged=await ggPullAndMerge(store.evs());
+      store.saveEvs(merged);setEventos([...merged]);
+      setGgLastSync(new Date());setGgConnected(true);
+    }catch(e){
+      const msg=e.status===401||e==='invalid_grant'?'Sessão expirada — reconecte o Google.':'Erro ao sincronizar. Tente novamente.';
+      setGgError(msg);
+      if(e.status===401||e==='invalid_grant'){setGgConnected(false);GG.disconnect();}
+    }
+    setGgSyncing(false);
+  };
+
+  const ggConnect=async()=>{
+    setGgError(null);
+    try{
+      await ggEnsureClient();
+      await ggRequestToken('consent');
+      setGgConnected(true);
+      await doGgSync();
+    }catch(e){
+      const msgs={'no_client_id':'Informe o Client ID primeiro.','gis_not_loaded':'Biblioteca Google não carregou. Verifique sua conexão.','popup_closed_by_user':'Login cancelado.','not_init':'Erro de inicialização.'};
+      setGgError(msgs[e]||'Erro ao autenticar. Verifique o Client ID e as Origens permitidas no Google Cloud.');
+    }
+  };
+
+  const ggDisconnect=()=>{
+    GG.disconnect();setGgConnected(false);setGgLastSync(null);setGgError(null);
+    const noGg=store.evs().filter(e=>!e.fromGoogle);
+    store.saveEvs(noGg);setEventos([...noGg]);
+  };
+
+  const ggProps={connected:ggConnected,syncing:ggSyncing,lastSync:ggLastSync,error:ggError,connect:ggConnect,sync:doGgSync,disconnect:ggDisconnect};
+
+  const handleLogin=(sess)=>{setSession(sess);setUserPhoto(authStore.photo(sess.userId));};
+  const handleUpdateSession=(sess)=>{setSession(sess);};
+  const handleUpdatePhoto=(data)=>{authStore.savePhoto(session.userId,data);setUserPhoto(data);};
+  const handleLogout=()=>{if(confirm('Sair da conta?')){authStore.clearSession();setSession(null);setEventos([]);setPlanos({});setPinnedBlocos([]);setMetas([]);setUserPhoto(null);}};
+
+  const handleSaveEvento=(ev,override)=>{
+    const cur=store.evs();
+    const isUpd=cur.some(e=>e.id===ev.id);
+    const novo=override||(isUpd?cur.map(e=>e.id===ev.id?ev:e):[...cur,ev]);
+    store.saveEvs(novo);setEventos([...novo]);
+    if(!override&&!ev.fromGoogle&&GG.connected()){
+      (async()=>{
+        try{
+          if(GG.expired())await ggRequestToken('');
+          const existing=cur.find(e=>e.id===ev.id);
+          if(existing?.googleId){await ggUpdate(existing.googleId,ev);}
+          else{
+            const gid=await ggCreate(ev);
+            if(gid){const upd=store.evs().map(e=>e.id===ev.id?{...e,googleId:gid}:e);store.saveEvs(upd);setEventos([...upd]);}
+          }
+        }catch(e){console.warn('GG push failed',e);}
+      })();
+    }
+  };
+
+  const handleDeleteEvento=(id)=>{
+    const ev=store.evs().find(e=>e.id===id);
+    const novo=store.evs().filter(e=>e.id!==id);
+    store.saveEvs(novo);setEventos([...novo]);
+    if(ev?.googleId&&GG.connected()){ggDeleteEv(ev.googleId).catch(e=>console.warn('GG delete fail',e));}
+  };
+  const handleSavePlano=(data,plano)=>{const cur=store.plans();const novo={...cur,[data]:plano};store.savePlans(novo);setPlanos({...novo});};
+  const handleSavePinned=(pins)=>{store.savePinned(pins);setPinnedBlocos([...pins]);};
+  const handleSaveMetas=(novo)=>{store.saveMetas(novo);setMetas([...novo]);};
+
+  // close sidebar when tab changes on mobile
+  const handleAba=(id)=>{setAba(id);setMobileOpen(false);};
+
+  if(!session) return <LoginPage onLogin={handleLogin}/>;
+
+  return(
+    <>
+      <Sidebar aba={aba} onAba={handleAba} collapsed={collapsed} onToggle={()=>setCollapsed(p=>!p)} user={session} onLogout={handleLogout} userPhoto={userPhoto} mobileOpen={mobileOpen} onCloseMobile={()=>setMobileOpen(false)}/>
+      <div className="main-content">
+        <Topbar aba={aba} clock={clock} hora={hora} eventos={eventos} onOpenSidebar={()=>setMobileOpen(true)}/>
+        {hora>=20&&aba!=='planejar'&&(
+          <div className="banner">
+            <Ic.Moon s={15} c='var(--accent2)'/>
+            <span className="banner-text" style={{fontSize:13}}>Já planejou o seu dia de amanhã?</span>
+            <button className="btn btn-accent2 btn-sm" onClick={()=>handleAba('planejar')}>Planejar agora →</button>
+            <button className="btn-icon btn-sm" style={{width:26,height:26,marginLeft:4}} onClick={()=>{}}>
+              <Ic.X s={14}/>
+            </button>
+          </div>
+        )}
+        {aba==='dashboard'&&<DashboardTab planos={planos} eventos={eventos}/>}
+        {aba==='metas'&&<MetasTab metas={metas} onSaveMetas={handleSaveMetas}/>}
+        {aba==='agenda'&&<AgendaTab eventos={eventos} onSaveEvento={handleSaveEvento} onDeleteEvento={handleDeleteEvento} gg={ggProps}/>}
+        {aba==='planejar'&&<PlanejaDiaTab eventos={eventos} planos={planos} pinnedBlocos={pinnedBlocos} onSavePlano={handleSavePlano} onSavePinned={handleSavePinned}/>}
+        {aba==='meudia'&&<MeuDiaTab eventos={eventos} planos={planos} pinnedBlocos={pinnedBlocos} onSavePlano={handleSavePlano} onGoPlanejar={()=>handleAba('planejar')}/>}
+        {aba==='perfil'&&<PerfilTab session={session} onUpdateSession={handleUpdateSession} onLogout={handleLogout} userPhoto={userPhoto} onUpdatePhoto={handleUpdatePhoto} gg={ggProps}/>}
+        <BottomNav aba={aba} onAba={handleAba}/>
+      </div>
+    </>
+  );
+}
+
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  document.getElementById('loading').style.display='none';
+} catch(e) {
+  document.getElementById('loading').style.display='none';
+  var box=document.getElementById('error-box');
+  box.style.display='flex';
+  document.getElementById('error-msg').textContent=e.stack||String(e);
+}
+</script>
+</body>
+</html>
